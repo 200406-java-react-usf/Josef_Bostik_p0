@@ -1,0 +1,35 @@
+{
+  "name": "project_0",
+  "version": "1.0.0",
+  "description": "Revature Project 0 --> Online Ordering System",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "tsc && node ./build/src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/200406-java-react-usf/Josef_Bostik_p0/tree/master"
+  },
+  "keywords": [
+    "TypeScript",
+    "PostGreSQL",
+    "node-postgre",
+    "Express",
+    "Jest",
+    "Git",
+    "SCM",
+    "Online_Ordering_System",
+    "Project_0"
+  ],
+  "author": "Josef Bostik",
+  "license": "ISC",
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "typescript": "^3.8.3"
+  },
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.29.0",
+    "@typescript-eslint/parser": "^2.29.0"
+  }
+}
