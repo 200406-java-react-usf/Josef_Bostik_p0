@@ -14,9 +14,9 @@ class ApplicationError {
 
 class ResourcePersistenceError extends ApplicationError {
 
-    constructor (rsn?: string) {
-        super(rsn);
-        super.message = 'The resource was not persisted.';
+    constructor(reason?: string) {
+        super(reason);
+        super.setMessage('The resource was not persisted.');
     }
     
 }
@@ -33,17 +33,17 @@ class ResourceNotFoundError extends ApplicationError {
 class BadRequestError extends ApplicationError {
 
 
-    constructor (rsn?: string) {
-        super(rsn);
-        super.message = 'Unspecified reason.';
+    constructor(reason?: string) {
+        super(reason);
+        super.setMessage('Invalid parameters provided.');
     }
 }
 
 class AuthenticationError extends ApplicationError {
 
-    constructor(rsn?: string) {
-        super(rsn);
-        super.message = 'Authentication failed';
+    constructor(reason?: string) {
+        super(reason);
+        super.setMessage('Authentication failed.');
     }
 
 }
@@ -52,7 +52,7 @@ class NotImplementedError extends ApplicationError {
 
     constructor(reason?: string) {
         super(reason);
-        super.message = 'No implementation yet.';
+        super.setMessage('No implementation yet!');
     }
 }
 
