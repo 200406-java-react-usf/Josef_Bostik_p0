@@ -7,10 +7,13 @@
  *          * calls getItemByID
  *          * adds item to orderContents
  *      - updateOrder()
+ * 
+ *      CREATE ORDERCOST METHOD
  */
 import data from '../data/order_db';
 import { Order } from '../models/order';
 import { CrudRepository } from './crud_repo';
+import Validator from '../util/validator';
 import {
     ResourceNotFoundError,
     ResourcePersistenceError,
@@ -43,24 +46,69 @@ class orderRepository implements CrudRepository<Order> {
 
     getByID(id: number): Promise<Order> {
         return new Promise<Order>((resolve, reject) => {
-            reject(new NotImplementedError());
+            if (!Validator.isValidId(id)) {
+                reject(new BadRequestError());
+            }
+
+            setTimeout(() => {
+                
+                const order = {...data.find(order=> order.id === id)};
+
+                if(Object.keys(order).length === 0) {
+                    reject(new ResourceNotFoundError());
+                    return;
+                }
+
+                resolve(order);
+
+            }, 250);
         });
     }
 
-    save(newObj: Order): Promise<Order> {
+    save(newOrder: Order): Promise<Order> {
         return new Promise<Order>((resolve, reject) => {
-            reject(new NotImplementedError());
+            if (!Validator.isValidObject(newOrder, 'id')) {
+                reject(new BadRequestError('Invalid property values found in provided order.'));
+                return;
+            }
+        
+            setTimeout(() => {
+        
+                newOrder.id = (data.length) + 1;
+                data.push(newOrder);
+        
+                resolve(newOrder);
+            }, 250);
         });
     }
 
-    update(updatedObj: Order): Promise<Boolean> {
+    update(updatedOrder: Order): Promise<Boolean> {
         return new Promise<Boolean>((resolve, reject) => {
-            reject(new NotImplementedError());
+            setTimeout(() => {
+        
+                let persistedOrder = data.find(order => order.id === updatedOrder.id);
+        
+                if (!persistedOrder) {
+                    reject(new ResourceNotFoundError('No order found with provided id.'));
+                    return;
+                }
+        
+    
+                persistedOrder = updatedOrder;
+    
+                resolve(true);
+        
+            });
         });
     }
 
+    //Not yet implemented
     deleteById(id: number): Promise<Boolean> {
         return new Promise<Boolean>((resolve, reject) => {
+            if (!Validator.isValidId(id)) {
+                reject(new BadRequestError());
+            }
+
             reject(new NotImplementedError());
         });
     }

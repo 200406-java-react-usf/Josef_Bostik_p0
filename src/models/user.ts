@@ -10,7 +10,6 @@
  *      - closedOrders
  */
 
-import { Order } from "./order";
 
 export class User {
 
@@ -21,11 +20,9 @@ export class User {
     lastName: string;
     email: string;
     dob: Date;
-    activeOrders: Order[];
-    closedOrders: Order[];
     
 
-    constructor(id: number, un: string, pw: string, fn: string, ln: string, email: string, dob: Date, ao: Order[], co: Order[]) {
+    constructor(id: number, un: string, pw: string, fn: string, ln: string, email: string, dob: Date) {
         this.id = id;
         this.username = un;
         this.password = pw;
@@ -33,8 +30,6 @@ export class User {
         this.lastName = ln;
         this.email = email;
         this.dob = dob;
-        this.activeOrders = ao;
-        this.closedOrders = co;
     }
 
-};
+}

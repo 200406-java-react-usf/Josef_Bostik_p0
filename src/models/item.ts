@@ -20,17 +20,13 @@ export class Item {
     name: string;
     description: string;
     cost: number;
-    location: string;
-    assnOrder: number; //0 if not assigned to an order
     amount: number;
 
-    constructor(ID: number, IN: string, ds: string, cs: number, lc: string, o: number, am: number) {
+    constructor(ID: number, itemName: string, description: string, cost: number, amount: number) {
         this.id = ID;
-        this.name = IN;
-        this.description = ds;
-        this.cost = cs;
-        this.location = lc;
-        this.assnOrder = o;
-        this.amount = am;
+        this.name = itemName;
+        this.description = description;
+        this.cost = cost;
+        this.amount = amount;
     }
 }

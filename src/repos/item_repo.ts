@@ -33,6 +33,7 @@
 import data from '../data/item_db';
 import { Item } from '../models/item';
 import { CrudRepository } from './crud_repo';
+import Validator from '../util/validator';
 import {
     ResourceNotFoundError,
     ResourcePersistenceError,
@@ -64,24 +65,75 @@ class itemRepository implements CrudRepository<Item> {
 
     getByID(id: number): Promise<Item> {
         return new Promise<Item>((resolve, reject) => {
-            reject(new NotImplementedError());
+            if (!Validator.isValidId(id)) {
+                reject(new BadRequestError());
+            }
+
+            setTimeout(() => {
+                
+                const item = {...data.find(item => item.id === id)};
+
+                if(Object.keys(item).length === 0) {
+                    reject(new ResourceNotFoundError());
+                    return;
+                }
+
+                resolve(item);
+
+            }, 250);
         });
     }
 
-    save(newObj: Item): Promise<Item> {
+    save(newItem: Item): Promise<Item> {
         return new Promise<Item>((resolve, reject) => {
-            reject(new NotImplementedError());
+            if (!Validator.isValidObject(newItem, 'id')) {
+                reject(new BadRequestError('Invalid property values found in provided item.'));
+                return;
+            }
+        
+            setTimeout(() => {
+        
+        
+                newItem.id = (data.length) + 1;
+                data.push(newItem);
+        
+                resolve(newItem);
+        
+            });
         });
     }
 
-    update(updatedObj: Item): Promise<Boolean> {
+    update(updatedItem: Item): Promise<Boolean> {
         return new Promise<Boolean>((resolve, reject) => {
-            reject(new NotImplementedError());
+            if (!Validator.isValidObject(updatedItem) || !Validator.isValidId(updatedItem.id)) {
+                reject(new BadRequestError('Invalid item provided (invalid values found).'));
+                return;
+            }
+        
+            setTimeout(() => {
+        
+                let persistedItem = data.find(item => item.id === updatedItem.id);
+        
+                if (!persistedItem) {
+                    reject(new ResourceNotFoundError('No item found with provided id.'));
+                    return;
+                }
+    
+                persistedItem = updatedItem;
+    
+                resolve(true);
+        
+            });
         });
     }
 
+    //Not yet implemented
     deleteById(id: number): Promise<Boolean> {
         return new Promise<Boolean>((resolve, reject) => {
+            if (!Validator.isValidId(id)) {
+                reject(new BadRequestError());
+            }
+
             reject(new NotImplementedError());
         });
     }
