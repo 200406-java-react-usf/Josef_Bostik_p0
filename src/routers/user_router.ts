@@ -1,11 +1,11 @@
 import url from 'url';
 import express from 'express';
 import { User } from '../models/user';
-import {UserInstance} from '../config/app';
+import {UserServiceInstance} from '../config/app';
 
 export const UserRouter = express.Router();
 
-const userInstance = new UserInstance;
+const userInstance = new UserServiceInstance;
 const userService = userInstance.getInstance();
 
 UserRouter.get('', async (req, resp) => {
@@ -39,7 +39,7 @@ UserRouter.get('/:id', async (req, resp) => {
 
 UserRouter.post('', async (req, resp) => {
 
-    console.log('POST REQUEST RECEIVED AT /users');
+    console.log('ORDER REQUEST RECEIVED AT /users');
     console.log(req.body);
     try {
         let newUser = await userService.addNewUser(req.body);

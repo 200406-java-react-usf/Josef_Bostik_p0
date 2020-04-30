@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import path from 'path';
 
 import { UserRouter } from './routers/user_router';
+import { OrderRouter } from './routers/order_router';
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use('/', bodyparser.json());
 
 
 app.use('/users', UserRouter);
+app.use('/orders', OrderRouter);
 
 
 app.listen(8080, () => {

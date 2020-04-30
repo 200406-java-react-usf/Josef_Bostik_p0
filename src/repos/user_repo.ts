@@ -58,7 +58,7 @@ export class UserRepository implements CrudRepository<User> {
                     return;
                 }
 
-                resolve(this.removePassword(user));
+                resolve(user);
 
             }, 250);
 
@@ -115,7 +115,7 @@ export class UserRepository implements CrudRepository<User> {
                 newUser.id = (data.length) + 1;
                 data.push(newUser);
         
-                resolve(this.removePassword(newUser));
+                resolve(newUser);
         
             });
 

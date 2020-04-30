@@ -23,7 +23,7 @@ import {
 } from '../errors/errors';
 
 
-class orderRepository implements CrudRepository<Order> {
+export class OrderRepository implements CrudRepository<Order> {
 
     getAll(): Promise<Order[]> {
         return new Promise((resolve, reject) => {

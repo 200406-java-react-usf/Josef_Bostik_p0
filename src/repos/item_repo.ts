@@ -42,7 +42,7 @@ import {
     NotImplementedError
 } from '../errors/errors';
 
-class itemRepository implements CrudRepository<Item> {
+export class ItemRepository implements CrudRepository<Item> {
 
     getAll(): Promise<Item[]> {
         return new Promise((resolve, reject) => {
