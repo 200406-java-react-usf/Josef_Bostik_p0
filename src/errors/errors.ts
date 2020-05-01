@@ -1,21 +1,27 @@
 class ApplicationError {
+
+    statusCode: number;
     message: string;
     reason: string;
+    timestamp: Date;
 
-    constructor(rsn?: string) { // the ? indicates field is optional
+    constructor(statusCode: number, rsn?: string) {
+        this.statusCode = statusCode;
         this.message = 'An unexpected error occurred.';
+        this.timestamp = new Date();
         rsn ? (this.reason = rsn) : this.reason = 'Unspecified reason.';
     }
 
-    setMessage(msg: string) {
-        this.message = msg;
+    setMessage(message: string) {
+        this.message = message;
     }
+
 }
 
 class ResourcePersistenceError extends ApplicationError {
 
     constructor(reason?: string) {
-        super(reason);
+        super(409, reason);
         super.setMessage('The resource was not persisted.');
     }
     
@@ -23,27 +29,44 @@ class ResourcePersistenceError extends ApplicationError {
 
 class ResourceNotFoundError extends ApplicationError {
 
-    constructor (rsn?: string) {
-        super(rsn);
-        super.setMessage('No resource found using provided criteria.'); // inconsistency just for demo
+    constructor(reason?: string) {
+        super(404, reason);
+        super.setMessage('No resource found using provided criteria.');
     }
     
 }
 
 class BadRequestError extends ApplicationError {
 
-
     constructor(reason?: string) {
-        super(reason);
+        super(400, reason);
         super.setMessage('Invalid parameters provided.');
     }
+
 }
 
 class AuthenticationError extends ApplicationError {
 
     constructor(reason?: string) {
-        super(reason);
+        super(401, reason);
         super.setMessage('Authentication failed.');
+    }
+
+}
+
+class AuthorizationError extends ApplicationError {
+
+    constructor(reason?: string) {
+        super(403, reason);
+        super.setMessage('You do not have permission to access this resource!');
+    }
+
+}
+class InternalServerError extends ApplicationError {
+
+    constructor(reason?: string) {
+        super(500, reason);
+        super.setMessage('An unexpected error occurred.');
     }
 
 }
@@ -51,15 +74,19 @@ class AuthenticationError extends ApplicationError {
 class NotImplementedError extends ApplicationError {
 
     constructor(reason?: string) {
-        super(reason);
+        super(501, reason);
         super.setMessage('No implementation yet!');
     }
+
 }
 
-export { // export default for arrays or nameless functions
+
+export {
     ResourceNotFoundError,
     ResourcePersistenceError,
     BadRequestError,
     AuthenticationError,
-    NotImplementedError
+    NotImplementedError,
+    AuthorizationError,
+    InternalServerError
 };
