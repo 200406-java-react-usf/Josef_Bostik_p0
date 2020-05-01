@@ -1,13 +1,10 @@
 /** Remember CRUD - create read update delete
- * Functionality to be had in the order_repo:
- *      - getAll()
- *      - getOrderByID()
- *      - addNewOrder()
+ * TODO:
  *      - addToOrder(itemID, orderID) --> 
  *          * calls getItemByID
  *          * adds item to orderContents
- *      - updateOrder()
- * 
+ *      
+ *      REFACTOR TO USE SQL DATABASE & ASYNC
  *      CREATE ORDERCOST METHOD
  */
 import data from '../data/order_db';
@@ -19,98 +16,100 @@ import {
     ResourcePersistenceError,
     BadRequestError,
     AuthenticationError,
-    NotImplementedError
+    NotImplementedError,
+    InternalServerError
 } from '../errors/errors';
+import { PoolClient } from 'pg';
+import { connectionPool } from '..';
+import { mapOrderResultSet } from '../util/result-set-mapper';
 
 
 export class OrderRepository implements CrudRepository<Order> {
 
-    getAll(): Promise<Order[]> {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                let Order: Order[] = [];
+    baseQuery = `
+        select
+            ao.id, 
+            ao.customerid, 
+            ao.status, 
+            ao.location,
+            ao.destination
+        from app_orders ao
+    `;
 
-                for (let item of data) {
-                    Order.push({...item});
-                }
+    async getAll(): Promise<Order[]> {
 
-                if(Order.length === 0) {
-                    reject(new ResourceNotFoundError());
-                    return;
-                }
-                
-                resolve(Order);
-            }, 250);
-        });
+        let client: PoolClient;
+
+        try {
+            client = await connectionPool.connect();
+            let sql = `${this.baseQuery}`;
+            let rs = await client.query(sql); // rs = ResultSet
+            return rs.rows.map(mapOrderResultSet);
+        } catch (e) {
+            throw new InternalServerError();
+        } finally {
+            client && client.release();
+        }
     }
 
-    getByID(id: number): Promise<Order> {
-        return new Promise<Order>((resolve, reject) => {
-            if (!Validator.isValidId(id)) {
-                reject(new BadRequestError());
-            }
+    async getByID(id: number): Promise<Order> {
+        let client: PoolClient;
 
-            setTimeout(() => {
-                
-                const order = {...data.find(order=> order.id === id)};
-
-                if(Object.keys(order).length === 0) {
-                    reject(new ResourceNotFoundError());
-                    return;
-                }
-
-                resolve(order);
-
-            }, 250);
-        });
+        try {
+            client = await connectionPool.connect();
+            let sql = `${this.baseQuery} where au.id = $1`;
+            let rs = await client.query(sql, [id]);
+            return mapOrderResultSet(rs.rows[0]);
+        } catch (e) {
+            throw new InternalServerError();
+        } finally {
+            client && client.release();
+        }
     }
 
-    save(newOrder: Order): Promise<Order> {
-        return new Promise<Order>((resolve, reject) => {
-            if (!Validator.isValidObject(newOrder, 'id')) {
-                reject(new BadRequestError('Invalid property values found in provided order.'));
-                return;
-            }
-        
-            setTimeout(() => {
-        
-                newOrder.id = (data.length) + 1;
-                data.push(newOrder);
-        
-                resolve(newOrder);
-            }, 250);
-        });
+    async save(newOrder: Order): Promise<Order> {
+        let client: PoolClient;
+
+        try {
+            client = await connectionPool.connect();
+            let sql = ``;
+            let rs = await client.query(sql, []);
+            return mapOrderResultSet(rs.rows[0]);
+        } catch (e) {
+            throw new InternalServerError();
+        } finally {
+            client && client.release();
+        }
     }
 
-    update(updatedOrder: Order): Promise<Boolean> {
-        return new Promise<Boolean>((resolve, reject) => {
-            setTimeout(() => {
-        
-                let persistedOrder = data.find(order => order.id === updatedOrder.id);
-        
-                if (!persistedOrder) {
-                    reject(new ResourceNotFoundError('No order found with provided id.'));
-                    return;
-                }
-        
-    
-                persistedOrder = updatedOrder;
-    
-                resolve(true);
-        
-            });
-        });
+    async update(updatedOrder: Order): Promise<boolean> {
+        let client: PoolClient;
+
+        try {
+            client = await connectionPool.connect();
+            let sql = ``;
+            let rs = await client.query(sql, []);
+            return true;
+        } catch (e) {
+            throw new InternalServerError();
+        } finally {
+            client && client.release();
+        }
     }
 
-    //Not yet implemented
-    deleteById(id: number): Promise<Boolean> {
-        return new Promise<Boolean>((resolve, reject) => {
-            if (!Validator.isValidId(id)) {
-                reject(new BadRequestError());
-            }
+    async deleteById(id: number): Promise<Boolean> {
+        let client: PoolClient;
 
-            reject(new NotImplementedError());
-        });
+        try {
+            client = await connectionPool.connect();
+            let sql = ``;
+            let rs = await client.query(sql, []);
+            return true;
+        } catch (e) {
+            throw new InternalServerError();
+        } finally {
+            client && client.release();
+        }
     }
 
 }

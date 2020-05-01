@@ -41,7 +41,7 @@ UserRouter.get('/:id', async (req, resp) => {
 
 UserRouter.post('', async (req, resp) => {
 
-    console.log('ORDER REQUEST RECEIVED AT /users');
+    console.log('USER REQUEST RECEIVED AT /users');
     console.log(req.body);
     try {
         let newUser = await userService.addNewUser(req.body);

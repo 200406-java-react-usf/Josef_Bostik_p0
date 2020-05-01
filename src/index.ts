@@ -7,6 +7,7 @@ import path from 'path';
 
 import { UserRouter } from './routers/user_router';
 import { OrderRouter } from './routers/order_router';
+import { ItemRouter } from './routers/item_router';
 import { sessionMiddleware } from './middleware/session-middleware';
 import { corsFilter } from './middleware/cors-filter';
 import { Pool } from 'pg';
@@ -36,6 +37,7 @@ app.use(corsFilter);
 app.use('/', bodyparser.json());
 app.use('/users', UserRouter);
 app.use('/orders', OrderRouter);
+app.use('/items', ItemRouter);
 
 
 app.listen(8080, () => {

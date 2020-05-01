@@ -1,9 +1,5 @@
 /** Remember CRUD - create read update delete
  * Functionality to be had in the item_repo:
- *      - getAll()
- *      - getItemByID(itemID)
- *          * inputs itemID
- *          * returns item
  *      - getItemName(itemID)
  *          * calls getItemByID
  *          * returns name
@@ -22,12 +18,10 @@
  *      - addToOrder(itemID, orderID) 
  *          * calls getItemByID
  *          * changes item status to orderID
- *      - getFirstAvailable(itemName)
+ *      - getFirstAvailable(itemName) --> probably depricated
  *          * inputs itemName
  *          * looks through itemDatabase to find first available item with that name
  *          * returns item
- *      - addNewItem(item, amount)
- *      - updateItem(olditem, newitem)
  */
 
 import data from '../data/item_db';
@@ -39,103 +33,100 @@ import {
     ResourcePersistenceError,
     BadRequestError,
     AuthenticationError,
-    NotImplementedError
+    NotImplementedError,
+    InternalServerError
 } from '../errors/errors';
+import { PoolClient } from 'pg';
+import { connectionPool } from '..';
+import { mapItemResultSet } from '../util/result-set-mapper';
 
 export class ItemRepository implements CrudRepository<Item> {
 
-    getAll(): Promise<Item[]> {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                let items: Item[] = [];
+    baseQuery = `
+        select
+            ai.id, 
+            ai.name, 
+            ai.description, 
+            ai.cost,
+            ai.amount
+        from app_items ai
+    `;
 
-                for (let item of data) {
-                    items.push({...item});
-                }
+    async getAll(): Promise<Item[]> {
+        let client: PoolClient;
 
-                if(items.length === 0) {
-                    reject(new ResourceNotFoundError());
-                    return;
-                }
-                
-                resolve(items);
-            }, 250);
-        });
+        try {
+            client = await connectionPool.connect();
+            let sql = `${this.baseQuery}`;
+            let rs = await client.query(sql); // rs = ResultSet
+            return rs.rows.map(mapItemResultSet);
+        } catch (e) {
+            throw new InternalServerError();
+        } finally {
+            client && client.release();
+        }
     }
 
-    getByID(id: number): Promise<Item> {
-        return new Promise<Item>((resolve, reject) => {
-            if (!Validator.isValidId(id)) {
-                reject(new BadRequestError());
-            }
+    async getByID(id: number): Promise<Item> {
 
-            setTimeout(() => {
-                
-                const item = {...data.find(item => item.id === id)};
+        let client: PoolClient;
 
-                if(Object.keys(item).length === 0) {
-                    reject(new ResourceNotFoundError());
-                    return;
-                }
-
-                resolve(item);
-
-            }, 250);
-        });
+        try {
+            client = await connectionPool.connect();
+            let sql = `${this.baseQuery} where au.id = $1`;
+            let rs = await client.query(sql, [id]);
+            return mapItemResultSet(rs.rows[0]);
+        } catch (e) {
+            throw new InternalServerError();
+        } finally {
+            client && client.release();
+        }
     }
 
-    save(newItem: Item): Promise<Item> {
-        return new Promise<Item>((resolve, reject) => {
-            if (!Validator.isValidObject(newItem, 'id')) {
-                reject(new BadRequestError('Invalid property values found in provided item.'));
-                return;
-            }
-        
-            setTimeout(() => {
-        
-        
-                newItem.id = (data.length) + 1;
-                data.push(newItem);
-        
-                resolve(newItem);
-        
-            });
-        });
+    async save(newItem: Item): Promise<Item> {
+        let client: PoolClient;
+
+        try {
+            client = await connectionPool.connect();
+            let sql = ``;
+            let rs = await client.query(sql, []);
+            return mapItemResultSet(rs.rows[0]);
+        } catch (e) {
+            throw new InternalServerError();
+        } finally {
+            client && client.release();
+        }
     }
 
-    update(updatedItem: Item): Promise<Boolean> {
-        return new Promise<Boolean>((resolve, reject) => {
-            if (!Validator.isValidObject(updatedItem) || !Validator.isValidId(updatedItem.id)) {
-                reject(new BadRequestError('Invalid item provided (invalid values found).'));
-                return;
-            }
-        
-            setTimeout(() => {
-        
-                let persistedItem = data.find(item => item.id === updatedItem.id);
-        
-                if (!persistedItem) {
-                    reject(new ResourceNotFoundError('No item found with provided id.'));
-                    return;
-                }
-    
-                persistedItem = updatedItem;
-    
-                resolve(true);
-        
-            });
-        });
+    async update(updatedItem: Item): Promise<boolean> {
+        let client: PoolClient;
+
+        try {
+            client = await connectionPool.connect();
+            let sql = ``;
+            let rs = await client.query(sql, []);
+            return true;
+        } catch (e) {
+            throw new InternalServerError();
+        } finally {
+            client && client.release();
+        }
     }
 
-    //Not yet implemented
-    deleteById(id: number): Promise<Boolean> {
-        return new Promise<Boolean>((resolve, reject) => {
-            if (!Validator.isValidId(id)) {
-                reject(new BadRequestError());
-            }
 
-            reject(new NotImplementedError());
-        });
+    async deleteById(id: number): Promise<Boolean> {
+        let client: PoolClient;
+
+        try {
+            client = await connectionPool.connect();
+            let sql = ``;
+            let rs = await client.query(sql, []);
+            return true;
+        } catch (e) {
+            throw new InternalServerError();
+        } finally {
+            client && client.release();
+        }
     }
 
 }

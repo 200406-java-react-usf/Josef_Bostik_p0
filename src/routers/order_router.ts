@@ -10,9 +10,7 @@ const orderService = orderInstance.getInstance();
 
 OrderRouter.get('', async (req, resp) => {
     try {
-
-        let reqURL = url.parse(req.url, true);
-
+        
         let payload = await orderService.getAllOrders();
         return resp.status(200).json(payload);
 

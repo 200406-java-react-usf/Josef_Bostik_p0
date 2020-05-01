@@ -9,9 +9,17 @@ export interface UserSchema {
 }
 
 export interface OrderSchema {
-
+    id: number,
+    customerId: number,
+    status: boolean,
+    location: string,
+    destination: string
 }
 
 export interface ItemSchema {
-    
+    id: number,
+    name: string,
+    description: string,
+    cost: number,
+    amount: number
 }

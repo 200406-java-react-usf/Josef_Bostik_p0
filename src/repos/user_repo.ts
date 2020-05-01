@@ -1,12 +1,7 @@
 /** Remember CRUD - create read update delete
- * Functionality to be had in the user_repo:
- * 
- *          getAll()
- *          getUserById()
- *          getUserByUsername()
+ * TODO:
+ *
  *          getUserByCredentials()
- *          addNewUser()
- *          updateUser()
  */
 
 import data from '../data/user_db';
@@ -137,7 +132,7 @@ export class UserRepository implements CrudRepository<User> {
         }
     }
 
-    //Not yet implemented
+    
     async deleteById(id: number): Promise<Boolean> {
         let client: PoolClient;
 
@@ -152,4 +147,5 @@ export class UserRepository implements CrudRepository<User> {
             client && client.release();
         }
     }
+
 }

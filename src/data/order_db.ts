@@ -11,6 +11,6 @@ let item4 = new Item(1, 'Colgate Anti-cavity', 'Colgate Toothpaste', 3.99, 5);
 let item5 = new Item(2, 'MalWart H2O', 'Water', 0.99, 3);
 
 export default [
-    new Order(id++, 1, [1, 2, 3], true, "Seattle, Washington", "New York City, New York"),
-    new Order(id++, 2, [4,5 ], true, "Seattle, Washington", "New York City, New York")
+    new Order(id++, 1, true, "Seattle, Washington", "New York City, New York"),
+    new Order(id++, 2, true, "Seattle, Washington", "New York City, New York")
 ];
