@@ -1,4 +1,4 @@
-import dotenv from 'dotenv'
+import dotenv from 'dotenv';
 import bodyparser from 'body-parser';
 import express from 'express';
 import fs from 'fs';

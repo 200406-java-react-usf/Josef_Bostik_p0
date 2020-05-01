@@ -18,166 +18,138 @@ import {
     ResourcePersistenceError,
     BadRequestError,
     AuthenticationError,
-    NotImplementedError
+    NotImplementedError,
+    InternalServerError
 } from '../errors/errors';
+import { PoolClient } from 'pg';
+import { connectionPool } from '..';
+import { mapUserResultSet } from '../util/result-set-mapper';
 
 export class UserRepository implements CrudRepository<User> {
 
-    getAll(): Promise<User[]> {
-        return new Promise((resolve, reject) => {
-            setTimeout(() => {
-                let users: User[] = [];
+    baseQuery = `
+        select
+            au.id, 
+            au.username, 
+            au.password, 
+            au.first_name,
+            au.last_name,
+            au.email,
+            ur.name as role_name
+        from app_users au
+        join user_roles ur
+        on au.role_id = ur.id
+    `;
 
-                for (let user of data) {
-                    users.push({...user});
-                }
+    async getAll(): Promise<User[]> {
+        let client: PoolClient;
 
-                if(users.length === 0) {
-                    reject(new ResourceNotFoundError());
-                    return;
-                }
-                
-                resolve(users);
-            }, 250);
-        });
+        try {
+            client = await connectionPool.connect();
+            let sql = `${this.baseQuery}`;
+            let rs = await client.query(sql); // rs = ResultSet
+            return rs.rows.map(mapUserResultSet);
+        } catch (e) {
+            throw new InternalServerError();
+        } finally {
+            client && client.release();
+        }
     }
 
-    getByID(id: number): Promise<User> {
-        return new Promise<User>((resolve, reject) => {
-            
-            if (!Validator.isValidId(id)) {
-                reject(new BadRequestError());
-            }
+    async getByID(id: number): Promise<User> {
 
-            setTimeout(() => {
-                
-                const user = {...data.find(user => user.id === id)};
+        let client: PoolClient;
 
-                if(Object.keys(user).length === 0) {
-                    reject(new ResourceNotFoundError());
-                    return;
-                }
-
-                resolve(user);
-
-            }, 250);
-
-        });
+        try {
+            client = await connectionPool.connect();
+            let sql = `${this.baseQuery} where au.id = $1`;
+            let rs = await client.query(sql, [id]);
+            return mapUserResultSet(rs.rows[0]);
+        } catch (e) {
+            throw new InternalServerError();
+        } finally {
+            client && client.release();
+        }
     }
 
 
     //Doesnt check for validity (if a key really is unique)
-    getUserByUniqueKey(key: string, val: string): Promise<User> {
-        return new Promise<User>((resolve, reject) => {
-            setTimeout(() => {
-                const user = {...data.find(user => user[key] === val)};
-                resolve(user);
-            }, 250);
-        });    
+    async getUserByUniqueKey(key: string, val: string): Promise<User> {
+
+        let client: PoolClient;
+
+        try {
+            client = await connectionPool.connect();
+            let sql = `${this.baseQuery} where au.${key} = $1`;
+            let rs = await client.query(sql, [val]);
+            return mapUserResultSet(rs.rows[0]);
+        } catch (e) {
+            throw new InternalServerError();
+        } finally {
+            client && client.release();
+        }    
     }
 
-    getUserByCredentials(un: string, pw: string): Promise<User> {
+    async getUserByCredentials(un: string, pw: string): Promise<User> {
         
-        return new Promise<User>((resolve, reject) => {
-        
-            setTimeout(() => {
-                const user = {...data.find(user => user.username === un && user.password === pw)};
-                resolve(user);  
-            }, 250);
+        let client: PoolClient;
 
-        });
+        try {
+            client = await connectionPool.connect();
+            let sql = `${this.baseQuery} where au.username = $1 and au.password = $2`;
+            let rs = await client.query(sql, [un, pw]);
+            return mapUserResultSet(rs.rows[0]);
+        } catch (e) {
+            throw new InternalServerError();
+        } finally {
+            client && client.release();
+        }
     }
 
-    save(newUser: User): Promise<User> {
-        return new Promise<User>((resolve, reject) => {
-        
-            if (!Validator.isValidObject(newUser, 'id')) {
-                reject(new BadRequestError('Invalid property values found in provided user.'));
-                return;
-            }
-        
-            setTimeout(() => {
-        
-                let conflict = data.filter(user => user.username == newUser.username).pop();
-        
-                if (conflict) {
-                    reject(new ResourcePersistenceError('The provided username is already taken.'));
-                    return;
-                }
-        
-                conflict = data.filter(user => user.email == newUser.email).pop();
-        
-                if (conflict) {
-                    reject(new ResourcePersistenceError('The provided email is already taken.'));
-                    return;
-                }
-        
-                newUser.id = (data.length) + 1;
-                data.push(newUser);
-        
-                resolve(newUser);
-        
-            });
+    async save(newUser: User): Promise<User> {
 
-        });
+        let client: PoolClient;
+
+        try {
+            client = await connectionPool.connect();
+            let sql = ``;
+            let rs = await client.query(sql, []);
+            return mapUserResultSet(rs.rows[0]);
+        } catch (e) {
+            throw new InternalServerError();
+        } finally {
+            client && client.release();
+        }
     }
 
-    update(updatedUser: User): Promise<Boolean> {
-        return new Promise<boolean>((resolve, reject) => {
+    async update(updatedUser: User): Promise<boolean> {
+        let client: PoolClient;
 
-            if (!Validator.isValidObject(updatedUser) || !Validator.isValidId(updatedUser.id)) {
-                reject(new BadRequestError('Invalid user provided (invalid values found).'));
-                return;
-            }
-        
-            setTimeout(() => {
-        
-                let persistedUser = data.find(user => user.id === updatedUser.id);
-        
-                if (!persistedUser) {
-                    reject(new ResourceNotFoundError('No user found with provided id.'));
-                    return;
-                }
-                
-                if (persistedUser.username != updatedUser.username) {
-                    reject(new ResourcePersistenceError('Usernames cannot be updated.'));
-                    return;
-                }
-        
-                const conflict = data.filter(user => {
-                    if (user.id == updatedUser.id) return false;
-                    return user.email == updatedUser.email; 
-                }).pop();
-        
-                if (conflict) {
-                    reject(new ResourcePersistenceError('Provided email is taken by another user.'));
-                    return;
-                }
-    
-                persistedUser = updatedUser;
-    
-                resolve(true);
-        
-            });
-
-        });
+        try {
+            client = await connectionPool.connect();
+            let sql = ``;
+            let rs = await client.query(sql, []);
+            return true;
+        } catch (e) {
+            throw new InternalServerError();
+        } finally {
+            client && client.release();
+        }
     }
 
     //Not yet implemented
-    deleteById(id: number): Promise<Boolean> {
-        return new Promise<boolean>((resolve, reject) => {
-            
-            if (!Validator.isValidId(id)) {
-                reject(new BadRequestError());
-            }
+    async deleteById(id: number): Promise<Boolean> {
+        let client: PoolClient;
 
-            reject(new NotImplementedError());
-        });
-    }
-
-    private removePassword(user: User): User {
-        let usr = {...user};
-        delete usr.password;
-        return usr;   
+        try {
+            client = await connectionPool.connect();
+            let sql = ``;
+            let rs = await client.query(sql, []);
+            return true;
+        } catch (e) {
+            throw new InternalServerError();
+        } finally {
+            client && client.release();
+        }
     }
 }

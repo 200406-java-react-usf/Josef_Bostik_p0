@@ -2,6 +2,8 @@ import url from 'url';
 import express from 'express';
 import { User } from '../models/user';
 import {UserServiceInstance} from '../config/app';
+import { ParsedUrlQuery } from 'querystring';
+import { isEmptyObject } from '../util/validator';
 
 export const UserRouter = express.Router();
 
@@ -13,16 +15,16 @@ UserRouter.get('', async (req, resp) => {
 
         let reqURL = url.parse(req.url, true);
 
-        if(Object.keys(reqURL.query).length !== 0) {
-            let payload = await userService.getUserByUniqueKey({...reqURL.query});;
-            return resp.status(200).json(payload);
+        if(!isEmptyObject<ParsedUrlQuery>(reqURL.query)) {
+            let payload = await userService.getUserByUniqueKey({...reqURL.query});
+            resp.status(200).json(payload);
         } else {
             let payload = await userService.getAllUsers();
-            return resp.status(200).json(payload);
+            resp.status(200).json(payload);
         }
 
     } catch (e) {
-        return resp.status(e.statusCode).json(e).send();
+        resp.status(e.statusCode).json(e);
     }
 });
 
