@@ -1,2 +1,2 @@
 
-![](images/ER_diagramV6.png)
+![](images/ER_diagram6.png)
