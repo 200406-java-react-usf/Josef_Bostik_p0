@@ -132,7 +132,7 @@ export class UserRepository implements CrudRepository<User> {
         }
     }
 
-    
+
     async deleteById(id: number): Promise<Boolean> {
         let client: PoolClient;
 
