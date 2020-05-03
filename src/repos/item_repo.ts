@@ -88,8 +88,11 @@ export class ItemRepository implements CrudRepository<Item> {
 
         try {
             client = await connectionPool.connect();
-            let sql = ``;
-            let rs = await client.query(sql, []);
+            let sql = `
+                insert into app_items (name, description, cost, amount) 
+                values ($1, $2, $3, $4) returning id
+            `;
+            let rs = await client.query(sql, [newItem.name, newItem.description, newItem.cost, newItem.amount]);
             return mapItemResultSet(rs.rows[0]);
         } catch (e) {
             throw new InternalServerError();
@@ -114,13 +117,15 @@ export class ItemRepository implements CrudRepository<Item> {
     }
 
 
-    async deleteById(id: number): Promise<Boolean> {
+    async deleteById(id: number): Promise<boolean> {
         let client: PoolClient;
 
         try {
             client = await connectionPool.connect();
-            let sql = ``;
-            let rs = await client.query(sql, []);
+            let sql = `
+                delete from app_items where id = $1
+            `;
+            let rs = await client.query(sql, [id]);
             return true;
         } catch (e) {
             throw new InternalServerError();

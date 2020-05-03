@@ -32,14 +32,27 @@ ItemRouter.get('/:id', async (req, resp) => {
 /**
  * Implement add item 
  */
-// UserRouter.post('', async (req, resp) => {
+ItemRouter.post('', async (req, resp) => {
 
-//     console.log('ORDER REQUEST RECEIVED AT /users');
-//     console.log(req.body);
-//     try {
-//         let newUser = await userService.addNewUser(req.body);
-//         return resp.status(201).json(newUser).send();
-//     } catch (e) {
-//         return resp.status(e.statusCode).json(e).send();
-//     }
-// });
+    console.log('Item POST REQUEST RECEIVED AT /items');
+    console.log(req.body);
+    try {
+        let newItem = await itemService.addNewItem(req.body);
+        return resp.status(201).json(newItem).send();
+    } catch (e) {
+        return resp.status(e.statusCode).json(e).send();
+    }
+});
+
+ItemRouter.delete('/:id', async (req, resp) => {
+    const id = +req.params.id;
+
+    console.log('ITEM DELETE REQUEST RECEIVED AT /items');
+    console.log(req.body);
+    try {
+        let status = await itemService.deleteById(id);
+        return resp.status(204).json(status).send();
+    } catch (e) {
+        return resp.status(e.statusCode).json(e).send();
+    }
+});

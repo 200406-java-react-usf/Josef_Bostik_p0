@@ -70,9 +70,13 @@ export class ItemService {
 
     }
 
-    deleteById(id: number): Promise<boolean> {
+    async deleteById(id: number): Promise<boolean> {
         
-        throw new NotImplementedError();
+        if(!isValidId(id)) {
+            throw new BadRequestError();
+        }
+
+        return await this.itemRepo.deleteById(id);
 
     }
 
