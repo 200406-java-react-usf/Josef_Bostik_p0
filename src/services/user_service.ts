@@ -122,25 +122,20 @@ export class UserService {
         if (!isValidObject(newUser, 'id')) {
             throw new BadRequestError('Invalid property values found in provided user.');
         }
-        let conflict;
-        try {
-            conflict = await this.getUserByUniqueKey({username: newUser.username});
-        } catch (e) {
-            conflict = false; //if getUserByUniqueKey throws an error, then there is no existing user with that username
-        }
-        console.log(conflict);
-        if (conflict) {
+
+        let usernameAvailable = await this.isUsernameAvailable(newUser.username);
+
+        if (!usernameAvailable) {
             throw new ResourcePersistenceError('The provided username is already taken.');
         }
-        try {
-            conflict = await this.getUserByUniqueKey({email: newUser.email});
-        } catch (e) {
-            conflict = false; //if getUserByUniqueKey throws an error, then there is no existing user with that email
-        }
-        if (conflict) {
+    
+        let emailAvailable = await this.isEmailAvailable(newUser.email);
+
+        if (!emailAvailable) {
             throw new  ResourcePersistenceError('The provided email is already taken.');
         }
 
+        newUser.role = 'User'; // all new registers have 'User' role by default
         const persistedUser = await this.userRepo.save(newUser);
 
         return this.removePassword(persistedUser);
@@ -160,10 +155,40 @@ export class UserService {
 
     }
 
-    deleteById(id: number): Promise<boolean> {
+    async deleteById(id: number): Promise<boolean> {
         
-        throw new NotImplementedError();
+        if(!isValidId(id)) {
+            throw new BadRequestError();
+        }
 
+        return await this.userRepo.deleteById(id);
+    }
+
+    private async isUsernameAvailable(username: string): Promise<boolean> {
+
+        try {
+            await this.getUserByUniqueKey({'username': username});
+        } catch (e) {
+            console.log('username is available')
+            return true;
+        }
+
+        console.log('username is unavailable')
+        return false;
+
+    }
+
+    private async isEmailAvailable(email: string): Promise<boolean> {
+        
+        try {
+            await this.getUserByUniqueKey({'email': email});
+        } catch (e) {
+            console.log('email is available')
+            return true;
+        }
+
+        console.log('email is unavailable')
+        return false;
     }
 
     private removePassword(user: User): User {

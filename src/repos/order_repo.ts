@@ -72,8 +72,11 @@ export class OrderRepository implements CrudRepository<Order> {
 
         try {
             client = await connectionPool.connect();
-            let sql = ``;
-            let rs = await client.query(sql, []);
+            let sql = `
+                insert into app_orders (customerid, status, location, destination) 
+                values ($1, $2, $3, $4) returning id
+            `;
+            let rs = await client.query(sql, [newOrder.customerId, newOrder.status, newOrder.location, newOrder.destination]);
             return mapOrderResultSet(rs.rows[0]);
         } catch (e) {
             throw new InternalServerError();
@@ -97,13 +100,15 @@ export class OrderRepository implements CrudRepository<Order> {
         }
     }
 
-    async deleteById(id: number): Promise<Boolean> {
+    async deleteById(id: number): Promise<boolean> {
         let client: PoolClient;
 
         try {
             client = await connectionPool.connect();
-            let sql = ``;
-            let rs = await client.query(sql, []);
+            let sql = `
+                delete from app_orders where id = $1
+            `;
+            let rs = await client.query(sql, [id]);
             return true;
         } catch (e) {
             throw new InternalServerError();

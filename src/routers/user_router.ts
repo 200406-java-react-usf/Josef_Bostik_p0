@@ -50,3 +50,16 @@ UserRouter.post('', async (req, resp) => {
         return resp.status(e.statusCode).json(e).send();
     }
 });
+
+UserRouter.delete('/:id', async (req, resp) => {
+    const id = +req.params.id;
+
+    console.log('USER DELETE REQUEST RECEIVED AT /users');
+    console.log(req.body);
+    try {
+        let status = await userService.deleteById(id);
+        return resp.status(204).json(status).send();
+    } catch (e) {
+        return resp.status(e.statusCode).json(e).send();
+    }
+});

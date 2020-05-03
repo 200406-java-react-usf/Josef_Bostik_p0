@@ -74,9 +74,13 @@ export class OrderService {
 
     }
 
-    deleteById(id: number): Promise<boolean> {
+    async deleteById(id: number): Promise<boolean> {
         
-        throw new NotImplementedError();
+        if(!isValidId(id)) {
+            throw new BadRequestError();
+        }
+
+        return await this.orderRepo.deleteById(id);
 
     }
 

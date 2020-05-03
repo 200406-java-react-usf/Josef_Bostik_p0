@@ -32,14 +32,28 @@ OrderRouter.get('/:id', async (req, resp) => {
 /**
  * Implement add order
  */
-// OrderRouter.post('', async (req, resp) => {
+OrderRouter.post('', async (req, resp) => {
 
-//     console.log('ORDER REQUEST RECEIVED AT /users');
-//     console.log(req.body);
-//     try {
-//         let newUser = await orderService.addNewOrder(req.body);
-//         return resp.status(201).json(newUser).send();
-//     } catch (e) {
-//         return resp.status(e.statusCode).json(e).send();
-//     }
-// });
+    console.log('ORDER POST REQUEST RECEIVED AT /orders');
+    console.log(req.body);
+    try {
+        let newUser = await orderService.addNewOrder(req.body);
+        return resp.status(201).json(newUser).send();
+    } catch (e) {
+        return resp.status(e.statusCode).json(e).send();
+    }
+});
+
+
+OrderRouter.delete('/:id', async (req, resp) => {
+    const id = +req.params.id;
+
+    console.log('ORDER DELETE REQUEST RECEIVED AT /orders');
+    console.log(req.body);
+    try {
+        let status = await orderService.deleteById(id);
+        return resp.status(204).json(status).send();
+    } catch (e) {
+        return resp.status(e.statusCode).json(e).send();
+    }
+});
