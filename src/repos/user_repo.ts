@@ -135,8 +135,17 @@ export class UserRepository implements CrudRepository<User> {
 
         try {
             client = await connectionPool.connect();
-            let sql = ``;
-            let rs = await client.query(sql, []);
+
+            let roleId = (await client.query('select id from user_roles where name = $1', [updatedUser.role])).rows[0].id;
+
+            let sql = `
+                update app_users
+                set username = $2, password = $3, first_name = $4, last_name = $5, email = $6, role_id = $7
+                where app_users.id = $1;
+            `;
+            console.log(updatedUser);
+            let rs = await client.query(sql, [updatedUser.id, updatedUser.username, updatedUser.password, updatedUser.firstName, updatedUser.lastName, updatedUser.email, roleId]);
+
             return true;
         } catch (e) {
             throw new InternalServerError();

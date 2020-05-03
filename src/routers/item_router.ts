@@ -56,3 +56,16 @@ ItemRouter.delete('/:id', async (req, resp) => {
         return resp.status(e.statusCode).json(e).send();
     }
 });
+
+ItemRouter.patch('/:id', async (req, resp) => {
+    const id = +req.params.id;
+
+    console.log('ITEM UPDATE REQUEST RECEIVED AT /items');
+    console.log(req.body);
+    try {
+        let status = await itemService.updateItem(id, req.body);
+        return resp.status(204).json(status).send();
+    } catch (e) {
+        return resp.status(e.statusCode).json(e).send();
+    }
+});

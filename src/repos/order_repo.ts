@@ -90,8 +90,14 @@ export class OrderRepository implements CrudRepository<Order> {
 
         try {
             client = await connectionPool.connect();
-            let sql = ``;
-            let rs = await client.query(sql, []);
+            let sql = `
+                update app_orders
+                set customerid = $2, status = $3, location = $4, destination = $5
+                where app_orders.id = $1;
+            `;
+            console.log(updatedOrder.customerId);
+
+            let rs = await client.query(sql, [updatedOrder.id, updatedOrder.customerId, updatedOrder.status, updatedOrder.location, updatedOrder.destination]);
             return true;
         } catch (e) {
             throw new InternalServerError();

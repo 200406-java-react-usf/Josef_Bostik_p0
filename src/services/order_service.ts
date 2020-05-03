@@ -63,13 +63,17 @@ export class OrderService {
 
     }
 
-    async updateOrder(updatedOrder: Order): Promise<boolean> {
+    async updateOrder(id: number, updatedOrder: Order): Promise<boolean> {
         
+
+
         if (!isValidObject(updatedOrder)) {
-            throw new BadRequestError('Invalid user provided (invalid values found).');
+            throw new BadRequestError('Invalid order provided (invalid values found).');
         }
 
         // let repo handle some of the other checking since we are still mocking db
+        updatedOrder.id = id;
+
         return await this.orderRepo.update(updatedOrder);
 
     }

@@ -57,3 +57,16 @@ OrderRouter.delete('/:id', async (req, resp) => {
         return resp.status(e.statusCode).json(e).send();
     }
 });
+
+OrderRouter.patch('/:id', async (req, resp) => {
+    const id = +req.params.id;
+
+    console.log('ORDER UPDATE REQUEST RECEIVED AT /orders');
+    console.log(req.body);
+    try {
+        let status = await orderService.updateOrder(id, req.body);
+        return resp.status(204).json(status).send();
+    } catch (e) {
+        return resp.status(e.statusCode).json(e).send();
+    }
+});

@@ -59,13 +59,15 @@ export class ItemService {
 
     }
 
-    async updateItem(updatedItem: Item): Promise<boolean> {
+    async updateItem(id: number, updatedItem: Item): Promise<boolean> {
         
         if (!isValidObject(updatedItem)) {
-            throw new BadRequestError('Invalid user provided (invalid values found).');
+            throw new BadRequestError('Invalid item provided (invalid values found).');
         }
 
         // let repo handle some of the other checking since we are still mocking db
+        updatedItem.id = id;
+        
         return await this.itemRepo.update(updatedItem);
 
     }

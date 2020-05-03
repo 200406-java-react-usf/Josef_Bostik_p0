@@ -81,18 +81,16 @@ export class UserService {
 
     }
 
-    getUserByCredentials(un: string, pw: string): Promise<User> {
+    async getUserByCredentials(un: string, pw: string): Promise<User> {
         
-        return new Promise<User>(async (resolve, reject) => {
-        
-            try {
-                const user = {...await this.userRepo.getUserByCredentials(un, pw)};
-                resolve(user);  
-            } catch (e) {
-                reject (e);
-            }
+    
+        try {
+            const user = {...await this.userRepo.getUserByCredentials(un, pw)};
+            return user;  
+        } catch (e) {
+            return e;
+        }
 
-        });
     }
 
     async authenticateUser(un: string, pw: string): Promise<User> {
@@ -143,14 +141,31 @@ export class UserService {
 
     }
 
-    async updateUser(updatedUser: User): Promise<boolean> {
+    async updateUser(id: number, updatedUser: User): Promise<boolean> {
 
+        
 
-        if (!isValidObject(updatedUser)) {
-            throw new BadRequestError('Invalid user provided (invalid values found).');
+        if (!isValidObject(updatedUser, 'id')) {
+            throw new BadRequestError('Invalid property values found in provided user.');
+        }
+
+        let usernameAvailable = await this.isUsernameAvailable(updatedUser.username, id);
+
+        if (!usernameAvailable) {
+            throw new ResourcePersistenceError('The provided username is already taken.');
+        }
+    
+        let emailAvailable = await this.isEmailAvailable(updatedUser.email, id);
+
+        if (!emailAvailable) {
+            throw new  ResourcePersistenceError('The provided email is already taken.');
         }
 
         // let repo handle some of the other checking since we are still mocking db
+        
+        updatedUser.id = id;
+        updatedUser.role = 'User'; // all new registers have 'User' role by default
+        
         return await this.userRepo.update(updatedUser);
 
     }
@@ -164,10 +179,12 @@ export class UserService {
         return await this.userRepo.deleteById(id);
     }
 
-    private async isUsernameAvailable(username: string): Promise<boolean> {
+    private async isUsernameAvailable(username: string, id?: number): Promise<boolean> {
 
         try {
-            await this.getUserByUniqueKey({'username': username});
+            if (await (await this.getUserByUniqueKey({'username': username})).id == id) {
+                return true;
+            }
         } catch (e) {
             console.log('username is available')
             return true;
@@ -178,10 +195,13 @@ export class UserService {
 
     }
 
-    private async isEmailAvailable(email: string): Promise<boolean> {
+    private async isEmailAvailable(email: string, id?: number): Promise<boolean> {
         
         try {
-            await this.getUserByUniqueKey({'email': email});
+            if (await (await this.getUserByUniqueKey({'email': email})).id == id) {
+                console.log('email at id');
+                return true;
+            }
         } catch (e) {
             console.log('email is available')
             return true;

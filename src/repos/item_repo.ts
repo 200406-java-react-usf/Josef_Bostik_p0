@@ -106,8 +106,12 @@ export class ItemRepository implements CrudRepository<Item> {
 
         try {
             client = await connectionPool.connect();
-            let sql = ``;
-            let rs = await client.query(sql, []);
+            let sql = `
+                update app_items
+                set name = $2, description = $3, cost = $4, amount = $5
+                where app_items.id = $1;
+            `;
+            let rs = await client.query(sql, [updatedItem.id, updatedItem.name, updatedItem.description, updatedItem.cost, updatedItem.amount]);
             return true;
         } catch (e) {
             throw new InternalServerError();
