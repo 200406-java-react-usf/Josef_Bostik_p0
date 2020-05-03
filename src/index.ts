@@ -1,3 +1,9 @@
+/**
+ * Entry point of the online ordering system API. Defines the
+ * basic structure of the program as well as the basic routing for
+ * all components of the system.
+ */
+
 import dotenv from 'dotenv';
 import bodyparser from 'body-parser';
 import express from 'express';
