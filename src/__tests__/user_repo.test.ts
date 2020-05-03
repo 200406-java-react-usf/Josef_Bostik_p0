@@ -1,12 +1,6 @@
 import { UserRepoInstance } from '../config/app';
 import { User } from '../models/user';
 import Validator from '../util/validator';
-import { 
-    BadRequestError, 
-    AuthenticationError, 
-    ResourceNotFoundError, 
-    ResourcePersistenceError 
-} from '../errors/errors';
 
 let sut = new UserRepoInstance;
 
@@ -27,7 +21,7 @@ describe('userRepo', () => {
             throw new Error('Failed to mock external method: isValidObject!');
         });
 
-    })
+    });
 
     test('should be a singleton', () => {
 
@@ -55,7 +49,7 @@ describe('userRepo', () => {
         expect(result).toBeTruthy();
         //Assert
         expect(result.length).toBeGreaterThan(0);
-        expect(result[0].password).toBe("password");
+        expect(result[0].password).toBe('password');
 
     });
 

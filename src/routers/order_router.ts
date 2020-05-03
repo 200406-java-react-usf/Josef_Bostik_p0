@@ -1,6 +1,4 @@
-import url from 'url';
 import express from 'express';
-import { Order } from '../models/order';
 import {OrderServiceInstance} from '../config/app';
 
 export const OrderRouter = express.Router();

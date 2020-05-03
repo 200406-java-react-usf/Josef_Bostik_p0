@@ -1,5 +1,4 @@
-import { User } from "../models/user";
-import data from '../data/order_db'
+import { User } from '../models/user';
 
 let id: number = 1;
 

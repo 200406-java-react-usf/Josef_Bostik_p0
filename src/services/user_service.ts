@@ -2,17 +2,17 @@
  * The purpose of order_service ensures that all properties passed to order_repo are valid.
  */
 
-import { User } from "../models/user";
-import { UserRepository } from "../repos/user_repo";
-import { isValidId, isValidStrings, isValidObject, isPropertyOf, isEmptyObject } from "../util/validator";
+import { User } from '../models/user';
+import { UserRepository } from '../repos/user_repo';
+import { isValidId, isValidStrings, isValidObject, isPropertyOf, isEmptyObject } from '../util/validator';
 import { 
     BadRequestError, 
     ResourceNotFoundError, 
     NotImplementedError, 
     ResourcePersistenceError, 
     AuthenticationError 
-} from "../errors/errors";
-import { query } from "express";
+} from '../errors/errors';
+import { query } from 'express';
 
 export class UserService {
 
@@ -222,11 +222,11 @@ export class UserService {
                 return true;
             }
         } catch (e) {
-            console.log('username is available')
+            console.log('username is available');
             return true;
         }
 
-        console.log('username is unavailable')
+        console.log('username is unavailable');
         return false;
 
     }
@@ -243,11 +243,11 @@ export class UserService {
                 return true;
             }
         } catch (e) {
-            console.log('email is available')
+            console.log('email is available');
             return true;
         }
 
-        console.log('email is unavailable')
+        console.log('email is unavailable');
         return false;
     }
 

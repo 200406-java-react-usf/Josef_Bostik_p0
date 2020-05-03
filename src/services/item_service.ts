@@ -2,11 +2,12 @@
  * The purpose of item_service ensures that all properties passed to item_repo are valid.
  */
 
-import { Item } from "../models/item";
-import { ItemRepository } from "../repos/item_repo";
-import { isValidId, isValidStrings, isValidObject, isPropertyOf, isEmptyObject } from "../util/validator";
-import { BadRequestError, ResourceNotFoundError, NotImplementedError, ResourcePersistenceError, AuthenticationError } from "../errors/errors";
-import { query } from "express";
+import { Item } from '../models/item';
+import { ItemRepository } from '../repos/item_repo';
+import { isValidId, isValidObject, isEmptyObject } from '../util/validator';
+import { BadRequestError, 
+    ResourceNotFoundError 
+} from '../errors/errors';
 
 export class ItemService {
 

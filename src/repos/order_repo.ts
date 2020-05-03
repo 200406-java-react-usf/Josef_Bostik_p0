@@ -7,16 +7,9 @@
  *      REFACTOR TO USE SQL DATABASE & ASYNC
  *      CREATE ORDERCOST METHOD
  */
-import data from '../data/order_db';
 import { Order } from '../models/order';
 import { CrudRepository } from './crud_repo';
-import Validator from '../util/validator';
 import {
-    ResourceNotFoundError,
-    ResourcePersistenceError,
-    BadRequestError,
-    AuthenticationError,
-    NotImplementedError,
     InternalServerError
 } from '../errors/errors';
 import { PoolClient } from 'pg';
@@ -97,7 +90,7 @@ export class OrderRepository implements CrudRepository<Order> {
             `;
             console.log(updatedOrder.customerId);
 
-            let rs = await client.query(sql, [updatedOrder.id, updatedOrder.customerId, updatedOrder.status, updatedOrder.location, updatedOrder.destination]);
+            await client.query(sql, [updatedOrder.id, updatedOrder.customerId, updatedOrder.status, updatedOrder.location, updatedOrder.destination]);
             return true;
         } catch (e) {
             throw new InternalServerError();
@@ -114,7 +107,7 @@ export class OrderRepository implements CrudRepository<Order> {
             let sql = `
                 delete from app_orders where id = $1
             `;
-            let rs = await client.query(sql, [id]);
+            await client.query(sql, [id]);
             return true;
         } catch (e) {
             throw new InternalServerError();

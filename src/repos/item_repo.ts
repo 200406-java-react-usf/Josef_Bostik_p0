@@ -24,16 +24,9 @@
  *          * returns item
  */
 
-import data from '../data/item_db';
 import { Item } from '../models/item';
 import { CrudRepository } from './crud_repo';
-import Validator from '../util/validator';
 import {
-    ResourceNotFoundError,
-    ResourcePersistenceError,
-    BadRequestError,
-    AuthenticationError,
-    NotImplementedError,
     InternalServerError
 } from '../errors/errors';
 import { PoolClient } from 'pg';
@@ -111,7 +104,7 @@ export class ItemRepository implements CrudRepository<Item> {
                 set name = $2, description = $3, cost = $4, amount = $5
                 where app_items.id = $1;
             `;
-            let rs = await client.query(sql, [updatedItem.id, updatedItem.name, updatedItem.description, updatedItem.cost, updatedItem.amount]);
+            await client.query(sql, [updatedItem.id, updatedItem.name, updatedItem.description, updatedItem.cost, updatedItem.amount]);
             return true;
         } catch (e) {
             throw new InternalServerError();
@@ -129,7 +122,7 @@ export class ItemRepository implements CrudRepository<Item> {
             let sql = `
                 delete from app_items where id = $1
             `;
-            let rs = await client.query(sql, [id]);
+            await client.query(sql, [id]);
             return true;
         } catch (e) {
             throw new InternalServerError();

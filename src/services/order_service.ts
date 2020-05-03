@@ -2,16 +2,15 @@
  * The purpose of order_service ensures that all properties passed to order_repo are valid.
  */
 
-import { Order } from "../models/order";
-import { OrderRepository } from "../repos/order_repo";
-import { isValidId, isValidStrings, isValidObject, isPropertyOf, isEmptyObject } from "../util/validator";
+import { Order } from '../models/order';
+import { OrderRepository } from '../repos/order_repo';
+import { isValidId, 
+    isValidObject, 
+    isEmptyObject 
+} from '../util/validator';
 import { BadRequestError, 
-    ResourceNotFoundError, 
-    NotImplementedError, 
-    ResourcePersistenceError, 
-    AuthenticationError 
-} from "../errors/errors";
-import { query } from "express";
+    ResourceNotFoundError
+} from '../errors/errors';
 
 export class OrderService {
 

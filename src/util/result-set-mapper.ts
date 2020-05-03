@@ -2,10 +2,10 @@
  * Basic methods for creating User, Order, and Item objects.
  */
 
-import { UserSchema, OrderSchema, ItemSchema } from "./schemas";
-import { User } from "../models/user";
-import { Order } from "../models/order";
-import { Item } from "../models/item";
+import { UserSchema, OrderSchema, ItemSchema } from './schemas';
+import { User } from '../models/user';
+import { Order } from '../models/order';
+import { Item } from '../models/item';
 
 export function mapUserResultSet(resultSet: UserSchema): User {
     

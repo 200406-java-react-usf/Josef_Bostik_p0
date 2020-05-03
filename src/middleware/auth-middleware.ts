@@ -1,7 +1,7 @@
 //not yet used
 
-import { Request, Response } from "express";
-import { AuthenticationError, AuthorizationError } from "../errors/errors";
+import { Request, Response } from 'express';
+import { AuthenticationError, AuthorizationError } from '../errors/errors';
 
 export const adminGuard = (req: Request, resp: Response, next) => {
 
@@ -13,4 +13,4 @@ export const adminGuard = (req: Request, resp: Response, next) => {
         resp.status(403).json(new AuthorizationError());
     }
 
-}
+};

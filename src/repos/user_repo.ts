@@ -4,16 +4,9 @@
  *          getUserByCredentials()
  */
 
-import data from '../data/user_db';
 import { User } from '../models/user';
 import { CrudRepository } from './crud_repo';
-import Validator from '../util/validator';
 import {
-    ResourceNotFoundError,
-    ResourcePersistenceError,
-    BadRequestError,
-    AuthenticationError,
-    NotImplementedError,
     InternalServerError
 } from '../errors/errors';
 import { PoolClient } from 'pg';
@@ -144,7 +137,7 @@ export class UserRepository implements CrudRepository<User> {
                 where app_users.id = $1;
             `;
             console.log(updatedUser);
-            let rs = await client.query(sql, [updatedUser.id, updatedUser.username, updatedUser.password, updatedUser.firstName, updatedUser.lastName, updatedUser.email, roleId]);
+            await client.query(sql, [updatedUser.id, updatedUser.username, updatedUser.password, updatedUser.firstName, updatedUser.lastName, updatedUser.email, roleId]);
 
             return true;
         } catch (e) {
@@ -163,7 +156,7 @@ export class UserRepository implements CrudRepository<User> {
             let sql = `
                 delete from app_users where id = $1
             `;
-            let rs = await client.query(sql, [id]);
+            await client.query(sql, [id]);
             return true;
         } catch (e) {
             throw new InternalServerError();

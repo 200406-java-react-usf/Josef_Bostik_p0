@@ -36,7 +36,7 @@ export const isPropertyOf = (prop: string, type: any) => {
 
     let typeCreator = <T>(Type: (new () => T)): T => {
         return new Type();
-    } 
+    }; 
 
     let tempInstance;
     try {
@@ -47,7 +47,7 @@ export const isPropertyOf = (prop: string, type: any) => {
     
     return Object.keys(tempInstance).includes(prop);
 
-}
+};
 
 /**
  * Checks to make sure an object is not empty by ensuring it is

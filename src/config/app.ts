@@ -1,9 +1,9 @@
-import { UserRepository } from "../repos/user_repo";
-import { UserService } from "../services/user_service";
-import { ItemRepository } from "../repos/item_repo";
-import { ItemService } from "../services/item_service";
-import { OrderRepository } from "../repos/order_repo";
-import { OrderService } from "../services/order_service";
+import { UserRepository } from '../repos/user_repo';
+import { UserService } from '../services/user_service';
+import { ItemRepository } from '../repos/item_repo';
+import { ItemService } from '../services/item_service';
+import { OrderRepository } from '../repos/order_repo';
+import { OrderService } from '../services/order_service';
 
 
 class UserServiceInstance {
@@ -58,4 +58,4 @@ export {
     ItemRepoInstance,
     OrderServiceInstance,
     OrderRepoInstance
-}
+};

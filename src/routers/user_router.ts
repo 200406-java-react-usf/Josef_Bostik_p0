@@ -1,6 +1,5 @@
 import url from 'url';
 import express from 'express';
-import { User } from '../models/user';
 import {UserServiceInstance} from '../config/app';
 import { ParsedUrlQuery } from 'querystring';
 import { isEmptyObject } from '../util/validator';
