@@ -1,3 +1,7 @@
+/**
+ * The purpose of order_service ensures that all properties passed to order_repo are valid.
+ */
+
 import { Order } from "../models/order";
 import { OrderRepository } from "../repos/order_repo";
 import { isValidId, isValidStrings, isValidObject, isPropertyOf, isEmptyObject } from "../util/validator";
@@ -15,6 +19,10 @@ export class OrderService {
         this.orderRepo = orderRepo;
     }
 
+    /**
+     * Retrieves all orders from the orderRepo and returns them
+     * if they exist.
+     */
     async getAllOrders(): Promise<Order[]> {
 
 
@@ -29,6 +37,9 @@ export class OrderService {
 
     }
 
+    /**
+     * Gets an order by its serial ID value
+     */
     async getOrderById(id: number): Promise<Order> {
 
         if (!isValidId(id)) {
@@ -51,6 +62,9 @@ export class OrderService {
     // authenticateUser(un: string, pw: string): Promise<User> {}
 
 
+    /**
+     * Adds a new order to the database
+     */
     async addNewOrder(newOrder: Order): Promise<Order> {
         
         if (!isValidObject(newOrder, 'id')) {
@@ -63,6 +77,10 @@ export class OrderService {
 
     }
 
+    /**
+     * Updates an order at the specified index given a new order object and a
+     * specified index.
+     */
     async updateOrder(id: number, updatedOrder: Order): Promise<boolean> {
         
 
@@ -78,6 +96,9 @@ export class OrderService {
 
     }
 
+    /**
+     * Deletes an item given its serial ID
+     */
     async deleteById(id: number): Promise<boolean> {
         
         if(!isValidId(id)) {

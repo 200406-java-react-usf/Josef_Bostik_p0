@@ -76,7 +76,7 @@ export class ItemService {
 
     /**
      * Updates an item at the specified index given a new item object and a
-     * specified index
+     * specified index.
      */
     async updateItem(id: number, updatedItem: Item): Promise<boolean> {
         

@@ -1,3 +1,7 @@
+/**
+ * The purpose of order_service ensures that all properties passed to order_repo are valid.
+ */
+
 import { User } from "../models/user";
 import { UserRepository } from "../repos/user_repo";
 import { isValidId, isValidStrings, isValidObject, isPropertyOf, isEmptyObject } from "../util/validator";
@@ -16,6 +20,10 @@ export class UserService {
         this.userRepo = userRepo;
     }
 
+    /**
+     * Retrieves all Users from the userRepo and returns them
+     * if they exist.
+     */
     async getAllUsers(): Promise<User[]> {
 
 
@@ -30,6 +38,9 @@ export class UserService {
 
     }
 
+    /**
+     * Gets a user by its serial ID value
+     */
     async getUserById(id: number): Promise<User> {
 
 
@@ -49,6 +60,10 @@ export class UserService {
 
     }
 
+    /**
+     * Retrieves a user from the database given a unique user key
+     * (e.g. username, email)
+     */
     async getUserByUniqueKey(queryObj: any): Promise<User> {
 
         let queryKeys = Object.keys(queryObj);
@@ -81,6 +96,9 @@ export class UserService {
 
     }
 
+    /**
+     * Inputs a username and password to return a user object.
+     */
     async getUserByCredentials(un: string, pw: string): Promise<User> {
         
     
@@ -93,6 +111,10 @@ export class UserService {
 
     }
 
+    /**
+     * Authenticates a user given a username and password. Returns
+     * the authenticated user.
+     */
     async authenticateUser(un: string, pw: string): Promise<User> {
 
 
@@ -114,6 +136,9 @@ export class UserService {
 
     }
 
+    /**
+     * Adds a new user to the database
+     */
     async addNewUser(newUser: User): Promise<User> {
         
 
@@ -141,6 +166,10 @@ export class UserService {
 
     }
 
+    /**
+     * Updates a user at the specified index given a new user object and a
+     * specified index.
+     */
     async updateUser(id: number, updatedUser: User): Promise<boolean> {
 
         
@@ -170,6 +199,9 @@ export class UserService {
 
     }
 
+    /**
+     * Deletes a user with the specified serial ID
+     */
     async deleteById(id: number): Promise<boolean> {
         
         if(!isValidId(id)) {
@@ -179,6 +211,10 @@ export class UserService {
         return await this.userRepo.deleteById(id);
     }
 
+    /**
+     * Returns a boolean value based on whether or not a username is available in the database.
+     * An id parameter is passed optionally to ignore a specified serial number.
+     */
     private async isUsernameAvailable(username: string, id?: number): Promise<boolean> {
 
         try {
@@ -195,6 +231,10 @@ export class UserService {
 
     }
 
+    /**
+     * Returns a boolean value based on whether or not an email is available in the database.
+     * An id parameter is passed optionally to ignore a specified serial number.
+     */
     private async isEmailAvailable(email: string, id?: number): Promise<boolean> {
         
         try {
@@ -211,6 +251,9 @@ export class UserService {
         return false;
     }
 
+    /**
+     * Inputs a user and returns the user without its password.
+     */
     private removePassword(user: User): User {
         if(!user || !user.password) return user;
         let usr = {...user};
