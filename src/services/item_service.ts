@@ -1,3 +1,7 @@
+/**
+ * The purpose of item_service ensures that all properties passed to item_repo are valid.
+ */
+
 import { Item } from "../models/item";
 import { ItemRepository } from "../repos/item_repo";
 import { isValidId, isValidStrings, isValidObject, isPropertyOf, isEmptyObject } from "../util/validator";
@@ -10,6 +14,10 @@ export class ItemService {
         this.itemRepo = itemRepo;
     }
 
+    /**
+     * Retrieves all items from the itemRepo and returns them
+     * if they exist.
+     */
     async getAllItems(): Promise<Item[]> {
 
         let items = await this.itemRepo.getAll();
@@ -22,6 +30,9 @@ export class ItemService {
 
     }
 
+    /**
+     * Gets an item by its serial ID value
+     */
     async getItemById(id: number): Promise<Item> {
 
         if (!isValidId(id)) {
@@ -39,19 +50,23 @@ export class ItemService {
     }
 
 
-    //Maybe add some sort of equivalent for:
+    //Note to self: Maybe add some sort of equivalent for:
     // getUserByUniqueKey(queryObj: any): Promise<User> {}
     // getUserByCredentials(un: string, pw: string): Promise<User> {}
     // authenticateUser(un: string, pw: string): Promise<User> {}
 
-
+    /**
+     * Adds a new item to the database
+     */
     async addNewItem(newItem: Item): Promise<Item> {
         
         if (!isValidObject(newItem, 'id')) {
             throw new BadRequestError('Invalid property values found in provided user.');
         }
-        //consider re-using items.... if you do... check to see if they exist
-        //before adding new ones!
+
+        //Note to self: consider re-using items: if you do... 
+        //check to see if the item exists in the database before 
+        //adding new ones.
 
         const persistedItem = await this.itemRepo.save(newItem);
 
@@ -59,6 +74,10 @@ export class ItemService {
 
     }
 
+    /**
+     * Updates an item at the specified index given a new item object and a
+     * specified index
+     */
     async updateItem(id: number, updatedItem: Item): Promise<boolean> {
         
         if (!isValidObject(updatedItem)) {
@@ -72,6 +91,9 @@ export class ItemService {
 
     }
 
+    /**
+     * Deletes an item given its serial ID
+     */
     async deleteById(id: number): Promise<boolean> {
         
         if(!isValidId(id)) {
