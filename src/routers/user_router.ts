@@ -3,13 +3,14 @@ import express from 'express';
 import {UserServiceInstance} from '../config/app';
 import { ParsedUrlQuery } from 'querystring';
 import { isEmptyObject } from '../util/validator';
+import { adminGuard } from '../middleware/auth_middleware';
 
 export const UserRouter = express.Router();
 
 const userInstance = new UserServiceInstance;
 const userService = userInstance.getInstance();
 
-UserRouter.get('', async (req, resp) => {
+UserRouter.get('', adminGuard, async (req, resp) => {
     try {
 
         let reqURL = url.parse(req.url, true);
@@ -27,7 +28,7 @@ UserRouter.get('', async (req, resp) => {
     }
 });
 
-UserRouter.get('/:id', async (req, resp) => {
+UserRouter.get('/:id', adminGuard, async (req, resp) => {
     const id = +req.params.id;
     try {
         let payload = await userService.getUserById(id);

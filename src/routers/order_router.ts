@@ -1,12 +1,13 @@
 import express from 'express';
 import {OrderServiceInstance} from '../config/app';
+import { adminGuard } from '../middleware/auth_middleware';
 
 export const OrderRouter = express.Router();
 
 const orderInstance = new OrderServiceInstance;
 const orderService = orderInstance.getInstance();
 
-OrderRouter.get('', async (req, resp) => {
+OrderRouter.get('', adminGuard, async (req, resp) => {
     try {
         
         let payload = await orderService.getAllOrders();
