@@ -329,4 +329,8 @@ describe('userService', () => {
 
     });
 
+    test('should resolve to User when getUserByCredentials is given a valid username and password', async () => {
+
+    });
+
 });
