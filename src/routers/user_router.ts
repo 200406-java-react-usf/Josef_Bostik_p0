@@ -16,7 +16,7 @@ UserRouter.get('', adminGuard, async (req, resp) => {
 
         let reqURL = url.parse(req.url, true);
 
-        if(!isEmptyObject<ParsedUrlQuery>(reqURL.query)) {
+        if(!isEmptyObject(reqURL.query)) {
             let payload = await userService.getUserByUniqueKey({...reqURL.query});
             resp.status(200).json(payload);
         } else {
