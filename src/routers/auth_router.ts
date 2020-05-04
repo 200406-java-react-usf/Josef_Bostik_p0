@@ -1,11 +1,12 @@
 import express from 'express';
-import { UserServiceInstance } from '../config/app';
+// import { UserServiceInstance } from '../config/app';
 import { Principal } from '../dtos/principal';
+import * as userService from '../services/user_service'
 
 export const AuthRouter = express.Router();
 
-const userInstance = new UserServiceInstance;
-const userService = userInstance.getInstance();
+// const userInstance = new UserServiceInstance;
+// const userService = UserInstance.getInstance();
 
 AuthRouter.get('', (req, resp) => {
     delete req.session.principal;

@@ -3,7 +3,7 @@
  */
 
 import { User } from '../models/user';
-import { UserRepository } from '../repos/user_repo';
+import * as userRepo from '../repos/user_repo';
 import { isValidId, isValidStrings, isValidObject, isPropertyOf, isEmptyObject } from '../util/validator';
 import { 
     BadRequestError, 
@@ -13,58 +13,56 @@ import {
     AuthenticationError 
 } from '../errors/errors';
 import { query } from 'express';
+import { Role } from '../models/role';
 
-export class UserService {
 
-    constructor(private userRepo: UserRepository) {
-        this.userRepo = userRepo;
+/**
+ * Retrieves all Users from the userRepo and returns them
+ * if they exist.
+ */
+export async function getAllUsers(): Promise<User[]> {
+
+
+    let users = await userRepo.getAll();
+
+    if (users.length == 0) {
+        throw new ResourceNotFoundError();
     }
 
-    /**
-     * Retrieves all Users from the userRepo and returns them
-     * if they exist.
-     */
-    async getAllUsers(): Promise<User[]> {
+    return users.map(removePassword);
 
 
-        let users = await this.userRepo.getAll();
+}
 
-        if (users.length == 0) {
-            throw new ResourceNotFoundError();
-        }
+/**
+ * Gets a user by its serial ID value
+ */
+export async function getUserById(id: number): Promise<User> {
 
-        return users.map(this.removePassword);
 
 
+    if (!isValidId(id)) {
+        throw new BadRequestError();
     }
 
-    /**
-     * Gets a user by its serial ID value
-     */
-    async getUserById(id: number): Promise<User> {
+    let user = await userRepo.getById(id);
 
-
-
-        if (!isValidId(id)) {
-            throw new BadRequestError();
-        }
-
-        let user = await this.userRepo.getByID(id);
-
-        if (isEmptyObject(user)) {
-            throw new ResourceNotFoundError();
-        }
-
-        return this.removePassword(user);
-
-
+    if (isEmptyObject(user)) {
+        throw new ResourceNotFoundError();
     }
 
-    /**
-     * Retrieves a user from the database given a unique user key
-     * (e.g. username, email)
-     */
-    async getUserByUniqueKey(queryObj: any): Promise<User> {
+    return removePassword(user);
+
+
+}
+
+/**
+ * Retrieves a user from the database given a unique user key
+ * (e.g. username, email)
+ */
+export async function getUserByUniqueKey(queryObj: any): Promise<User> {
+
+    try {
 
         let queryKeys = Object.keys(queryObj);
 
@@ -86,37 +84,43 @@ export class UserService {
             throw new BadRequestError();
         }
 
-        let user = await this.userRepo.getUserByUniqueKey(key, val);
+        let user = await userRepo.getUserByUniqueKey(key, val);
 
         if (isEmptyObject(user)) {
             throw new ResourceNotFoundError();
         }
 
-        return this.removePassword(user);
+        return removePassword(user);
 
+    } catch (e) {
+        throw e;
     }
 
-    /**
-     * Inputs a username and password to return a user object.
-     */
-    async getUserByCredentials(un: string, pw: string): Promise<User> {
-        
+}
+
+/**
+ * Inputs a username and password to return a user object.
+ */
+export async function getUserByCredentials(un: string, pw: string): Promise<User> {
     
-        try {
-            const user = {...await this.userRepo.getUserByCredentials(un, pw)};
-            return user;  
-        } catch (e) {
-            return e;
-        }
 
+    try {
+        const user = {...await userRepo.getUserByCredentials(un, pw)};
+        return user;  
+    } catch (e) {
+        return e;
     }
 
-    /**
-     * Authenticates a user given a username and password. Returns
-     * the authenticated user.
-     */
-    async authenticateUser(un: string, pw: string): Promise<User> {
+}
 
+/**
+ * Authenticates a user given a username and password. Returns
+ * the authenticated user.
+ */
+export async function authenticateUser(un: string, pw: string): Promise<User> {
+
+
+    try {
 
         if (!isValidStrings(un, pw)) {
             throw new BadRequestError();
@@ -124,67 +128,74 @@ export class UserService {
 
         let authUser: User;
         
-        authUser = await this.userRepo.getUserByCredentials(un, pw);
-        
+        authUser = await userRepo.getUserByCredentials(un, pw);
 
         if (isEmptyObject(authUser)) {
             throw new AuthenticationError('Bad credentials provided.');
         }
 
-        return this.removePassword(authUser);
+        return removePassword(authUser);
 
-
+    } catch (e) {
+        throw e;
     }
 
-    /**
-     * Adds a new user to the database
-     */
-    async addNewUser(newUser: User): Promise<User> {
-        
+
+}
+
+/**
+ * Adds a new user to the database
+ */
+export async function addNewUser(newUser: User): Promise<User> {
+    
+
+    try {
 
         if (!isValidObject(newUser, 'id')) {
             throw new BadRequestError('Invalid property values found in provided user.');
         }
 
-        let usernameAvailable = await this.isUsernameAvailable(newUser.username);
+        let usernameAvailable = await isUsernameAvailable(newUser.username);
 
         if (!usernameAvailable) {
             throw new ResourcePersistenceError('The provided username is already taken.');
         }
     
-        let emailAvailable = await this.isEmailAvailable(newUser.email);
+        let emailAvailable = await isEmailAvailable(newUser.email);
 
         if (!emailAvailable) {
             throw new  ResourcePersistenceError('The provided email is already taken.');
         }
 
-        newUser.role = 'User'; // all new registers have 'User' role by default
-        const persistedUser = await this.userRepo.save(newUser);
+        newUser.role = new Role('User'); // all new registers have 'User' role by default
+        const persistedUser = await userRepo.save(newUser);
 
-        return this.removePassword(persistedUser);
+        return removePassword(persistedUser);
 
-
+    } catch (e) {
+        throw e
     }
+}
 
-    /**
-     * Updates a user at the specified index given a new user object and a
-     * specified index.
-     */
-    async updateUser(id: number, updatedUser: User): Promise<boolean> {
+/**
+ * Updates a user at the specified index given a new user object and a
+ * specified index.
+ */
+export async function updateUser(id: number, updatedUser: User): Promise<boolean> {
 
-        
+    try {
 
         if (!isValidObject(updatedUser, 'id')) {
             throw new BadRequestError('Invalid property values found in provided user.');
         }
 
-        let usernameAvailable = await this.isUsernameAvailable(updatedUser.username, id);
+        let usernameAvailable = await isUsernameAvailable(updatedUser.username, id);
 
         if (!usernameAvailable) {
             throw new ResourcePersistenceError('The provided username is already taken.');
         }
-    
-        let emailAvailable = await this.isEmailAvailable(updatedUser.email, id);
+
+        let emailAvailable = await isEmailAvailable(updatedUser.email, id);
 
         if (!emailAvailable) {
             throw new  ResourcePersistenceError('The provided email is already taken.');
@@ -193,72 +204,79 @@ export class UserService {
         // let repo handle some of the other checking since we are still mocking db
         
         updatedUser.id = id;
-        updatedUser.role = 'User'; // all new registers have 'User' role by default
+        updatedUser.role = new Role('User'); // all new registers have 'User' role by default
         
-        return await this.userRepo.update(updatedUser);
+        return await userRepo.update(updatedUser);
 
+    } catch (e) {
+        throw e;
     }
 
-    /**
-     * Deletes a user with the specified serial ID
-     */
-    async deleteById(id: number): Promise<boolean> {
-        
+}
+
+/**
+ * Deletes a user with the specified serial ID
+ */
+export async function deleteById(id: number): Promise<boolean> {
+    
+    try {
+
         if(!isValidId(id)) {
             throw new BadRequestError();
         }
 
-        return await this.userRepo.deleteById(id);
+        return await userRepo.deleteById(id);
+    } catch (e) {
+        throw e;
     }
+}
 
-    /**
-     * Returns a boolean value based on whether or not a username is available in the database.
-     * An id parameter is passed optionally to ignore a specified serial number.
-     */
-    private async isUsernameAvailable(username: string, id?: number): Promise<boolean> {
+/**
+ * Returns a boolean value based on whether or not a username is available in the database.
+ * An id parameter is passed optionally to ignore a specified serial number.
+ */
+async function isUsernameAvailable(username: string, id?: number): Promise<boolean> {
 
-        try {
-            if (await (await this.getUserByUniqueKey({'username': username})).id == id) {
-                return true;
-            }
-        } catch (e) {
-            console.log('username is available');
+    try {
+        if (await (await getUserByUniqueKey({'username': username})).id == id) {
             return true;
         }
-
-        console.log('username is unavailable');
-        return false;
-
+    } catch (e) {
+        console.log('username is available');
+        return true;
     }
 
-    /**
-     * Returns a boolean value based on whether or not an email is available in the database.
-     * An id parameter is passed optionally to ignore a specified serial number.
-     */
-    private async isEmailAvailable(email: string, id?: number): Promise<boolean> {
-        
-        try {
-            if (await (await this.getUserByUniqueKey({'email': email})).id == id) {
-                console.log('email at id');
-                return true;
-            }
-        } catch (e) {
-            console.log('email is available');
+    console.log('username is unavailable');
+    return false;
+
+}
+
+/**
+ * Returns a boolean value based on whether or not an email is available in the database.
+ * An id parameter is passed optionally to ignore a specified serial number.
+ */
+async function isEmailAvailable(email: string, id?: number): Promise<boolean> {
+    
+    try {
+        if (await (await getUserByUniqueKey({'email': email})).id == id) {
+            console.log('email at id');
             return true;
         }
-
-        console.log('email is unavailable');
-        return false;
+    } catch (e) {
+        console.log('email is available');
+        return true;
     }
 
-    /**
-     * Inputs a user and returns the user without its password.
-     */
-    private removePassword(user: User): User {
-        if(!user || !user.password) return user;
-        let usr = {...user};
-        delete usr.password;
-        return usr;   
-    }
+    console.log('email is unavailable');
+    return false;
+}
 
+/**
+ * Inputs a user and returns the user without its password.
+ */
+function removePassword(user: User): User {
+    if(!user || !user.password) return user;
+    let usr = {...user};
+    delete usr.password;
+    return usr;   
 }

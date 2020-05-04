@@ -1,11 +1,12 @@
 import express from 'express';
-import {OrderServiceInstance} from '../config/app';
+// import {OrderServiceInstance} from '../config/app';
 import { adminGuard } from '../middleware/auth_middleware';
+import * as orderService from '../services/order_service'
 
 export const OrderRouter = express.Router();
 
-const orderInstance = new OrderServiceInstance;
-const orderService = orderInstance.getInstance();
+// const orderInstance = new OrderServiceInstance;
+// const orderService = orderInstance.getInstance();
 
 OrderRouter.get('', adminGuard, async (req, resp) => {
     try {

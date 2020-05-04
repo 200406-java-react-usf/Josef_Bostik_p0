@@ -33,102 +33,100 @@ import { PoolClient } from 'pg';
 import { connectionPool } from '..';
 import { mapItemResultSet } from '../util/result-set-mapper';
 
-export class ItemRepository implements CrudRepository<Item> {
 
-    baseQuery = `
-        select
-            ai.id, 
-            ai.name, 
-            ai.description, 
-            ai.cost,
-            ai.amount
-        from app_items ai
-    `;
+let baseQuery = `
+    select
+        ai.id, 
+        ai.name, 
+        ai.description, 
+        ai.cost,
+        ai.amount
+    from app_items ai
+`;
 
-    async getAll(): Promise<Item[]> {
-        let client: PoolClient;
+export async function getAll(): Promise<Item[]> {
+    let client: PoolClient;
 
-        try {
-            client = await connectionPool.connect();
-            let sql = `${this.baseQuery}`;
-            let rs = await client.query(sql); // rs = ResultSet
-            return rs.rows.map(mapItemResultSet);
-        } catch (e) {
-            throw new InternalServerError();
-        } finally {
-            client && client.release();
-        }
+    try {
+        client = await connectionPool.connect();
+        let sql = `${baseQuery}`;
+        let rs = await client.query(sql); // rs = ResultSet
+        return rs.rows.map(mapItemResultSet);
+    } catch (e) {
+        throw new InternalServerError();
+    } finally {
+        client && client.release();
     }
-
-    async getByID(id: number): Promise<Item> {
-
-        let client: PoolClient;
-
-        try {
-            client = await connectionPool.connect();
-            let sql = `${this.baseQuery} where au.id = $1`;
-            let rs = await client.query(sql, [id]);
-            return mapItemResultSet(rs.rows[0]);
-        } catch (e) {
-            throw new InternalServerError();
-        } finally {
-            client && client.release();
-        }
-    }
-
-    async save(newItem: Item): Promise<Item> {
-        let client: PoolClient;
-
-        try {
-            client = await connectionPool.connect();
-            let sql = `
-                insert into app_items (name, description, cost, amount) 
-                values ($1, $2, $3, $4) returning id
-            `;
-            let rs = await client.query(sql, [newItem.name, newItem.description, newItem.cost, newItem.amount]);
-            return mapItemResultSet(rs.rows[0]);
-        } catch (e) {
-            throw new InternalServerError();
-        } finally {
-            client && client.release();
-        }
-    }
-
-    async update(updatedItem: Item): Promise<boolean> {
-        let client: PoolClient;
-
-        try {
-            client = await connectionPool.connect();
-            let sql = `
-                update app_items
-                set name = $2, description = $3, cost = $4, amount = $5
-                where app_items.id = $1;
-            `;
-            await client.query(sql, [updatedItem.id, updatedItem.name, updatedItem.description, updatedItem.cost, updatedItem.amount]);
-            return true;
-        } catch (e) {
-            throw new InternalServerError();
-        } finally {
-            client && client.release();
-        }
-    }
-
-
-    async deleteById(id: number): Promise<boolean> {
-        let client: PoolClient;
-
-        try {
-            client = await connectionPool.connect();
-            let sql = `
-                delete from app_items where id = $1
-            `;
-            await client.query(sql, [id]);
-            return true;
-        } catch (e) {
-            throw new InternalServerError();
-        } finally {
-            client && client.release();
-        }
-    }
-
 }
+
+export async function  getByID(id: number): Promise<Item> {
+
+    let client: PoolClient;
+
+    try {
+        client = await connectionPool.connect();
+        let sql = `${baseQuery} where au.id = $1`;
+        let rs = await client.query(sql, [id]);
+        return mapItemResultSet(rs.rows[0]);
+    } catch (e) {
+        throw new InternalServerError();
+    } finally {
+        client && client.release();
+    }
+}
+
+export async function  save(newItem: Item): Promise<Item> {
+    let client: PoolClient;
+
+    try {
+        client = await connectionPool.connect();
+        let sql = `
+            insert into app_items (name, description, cost, amount) 
+            values ($1, $2, $3, $4) returning id
+        `;
+        let rs = await client.query(sql, [newItem.name, newItem.description, newItem.cost, newItem.amount]);
+        return mapItemResultSet(rs.rows[0]);
+    } catch (e) {
+        throw new InternalServerError();
+    } finally {
+        client && client.release();
+    }
+}
+
+export async function  update(updatedItem: Item): Promise<boolean> {
+    let client: PoolClient;
+
+    try {
+        client = await connectionPool.connect();
+        let sql = `
+            update app_items
+            set name = $2, description = $3, cost = $4, amount = $5
+            where app_items.id = $1;
+        `;
+        await client.query(sql, [updatedItem.id, updatedItem.name, updatedItem.description, updatedItem.cost, updatedItem.amount]);
+        return true;
+    } catch (e) {
+        throw new InternalServerError();
+    } finally {
+        client && client.release();
+    }
+}
+
+
+export async function  deleteById(id: number): Promise<boolean> {
+    let client: PoolClient;
+
+    try {
+        client = await connectionPool.connect();
+        let sql = `
+            delete from app_items where id = $1
+        `;
+        await client.query(sql, [id]);
+        return true;
+    } catch (e) {
+        throw new InternalServerError();
+    } finally {
+        client && client.release();
+    }
+}
+

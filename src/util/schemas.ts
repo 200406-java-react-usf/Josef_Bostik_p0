@@ -1,3 +1,5 @@
+import { Role } from "../models/role";
+
 export interface UserSchema {
     id: number,
     username: string,
@@ -5,7 +7,7 @@ export interface UserSchema {
     first_name: string,
     last_name: string,
     email: string,
-    role_name: string
+    role_name: Role
 }
 
 export interface OrderSchema {

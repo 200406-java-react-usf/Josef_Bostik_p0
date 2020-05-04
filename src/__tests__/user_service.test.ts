@@ -1,40 +1,108 @@
-import { UserService } from '../services/user_service';
-import { UserRepository } from '../repos/user_repo';
+import * as sut from '../services/user_service';
+import * as mockRepo from '../repos/user_repo';
+import * as mockValidator from '../util/validator';
+
 import { User } from '../models/user';
-import Validator from '../util/validator';
 import { ResourceNotFoundError, BadRequestError } from '../errors/errors';
+import { Role } from '../models/role';
+
+/*
+    In order to properly mock all of the functions exported by
+    the a module, we will invoke jest.mock() and pass to it: 
+        
+        - a relative path to the module we wish to mock as string
+
+        - a function which will return the mocked module's exposed 
+          functions (which are all mocked as well)
+
+    Interesting fact: jest.mock() is actually executed before any
+    import statements.
+
+*/
+jest.mock('../repos/user_repo', () => {
+
+    /* 
+        It is important to note that the object that is being returned
+        exposes properties that are named the exact same as the functions
+        exposed by the user-repo module, and all of the properties a Jest
+        mock functions.
+    */
+    return {
+        getAll: jest.fn(),
+        getById: jest.fn(),
+        getUserByUniqueKey: jest.fn(),
+        getUserByCredentials: jest.fn(),
+        save: jest.fn(),
+        update: jest.fn(),
+        deleteById: jest.fn()
+    }
+});
+
+jest.mock('../util/validator', () => {
+    return {
+        isValidId: jest.fn(),
+        isValidStrings: jest.fn(),
+        isValidObject: jest.fn(),
+        isPropertyOf: jest.fn(),
+        isEmptyObject: jest.fn()
+    }
+});
 
 describe('userService', () => {
 
-    let sut: UserService;
-    let mockRepo: UserRepository = new UserRepository();
-
     let mockUsers = [
-        new User(1, 'aanderson', 'password', 'Alice', 'Anderson', 'aanderson@revature.com', 'Admin'),
-        new User(2, 'bbailey', 'password', 'Bob', 'Bailey', 'bbailey@revature.com', 'User'),
-        new User(3, 'ccountryman', 'password', 'Charlie', 'Countryman', 'ccountryman@revature.com', 'User'),
-        new User(4, 'ddavis', 'password', 'Daniel', 'Davis', 'ddavis@revature.com', 'User'),
-        new User(5, 'eeinstein', 'password', 'Emily', 'Einstein', 'eeinstein@revature.com', 'User')
+        new User(1, 'aanderson', 'password', 'Alice', 'Anderson', 'aanderson@revature.com', new Role(1)),
+        new User(2, 'bbailey', 'password', 'Bob', 'Bailey', 'bbailey@revature.com', new Role(2)),
+        new User(3, 'ccountryman', 'password', 'Charlie', 'Countryman', 'ccountryman@revature.com', new Role(3)),
+        new User(4, 'ddavis', 'password', 'Daniel', 'Davis', 'ddavis@revature.com', new Role(4)),
+        new User(5, 'eeinstein', 'password', 'Emily', 'Einstein', 'eeinstein@revature.com', new Role(5))
     ];
 
     beforeEach(() => {
+        
+        /*
+            The mocking logic above makes all of the functions exposed 
+            by the user-repo module mock functions. However, TypeScript 
+            doesn't know that (because of that interesting fact from 
+            earlier) so it will give us compiler errors if we use Mock
+            methods (e.g. mockReturnValue, mockImplementation, etc.).
 
-        sut = new UserService(mockRepo);
+            The way around this is the either cast the operation as type
+            jest.Mock, or to include the @ts-ignore directive to tell the
+            TypeScript compiler to ignore it.
 
-        // Reset all external methods
-        for (let method in UserRepository.prototype) {
-            UserRepository.prototype[method] = jest.fn().mockImplementation(() => {
-                throw new Error(`Failed to mock external method: UserRepository.${method}!`);
-            });
-        }
-    
+            Remember that Jest is a JavaScript framework, and it takes
+            some configuring and syntactic gymnastics to get TypeScript
+            to play nicely with it. 
+
+        */
+
+        // casting the function as jest.Mock -- option 1
+        (mockRepo.getAll as jest.Mock).mockClear();
+
+        // @ts-ignore -- option 2 (only ignores the next line of code)
+        mockRepo.getById.mockClear();
+
+        (mockRepo.getUserByUniqueKey as jest.Mock).mockClear();
+        (mockRepo.getUserByCredentials as jest.Mock).mockClear();
+        (mockRepo.save as jest.Mock).mockClear();
+        (mockRepo.update as jest.Mock).mockClear();
+        (mockRepo.deleteById as jest.Mock).mockClear();
+
+        (mockValidator.isValidId as jest.Mock).mockClear();
+        (mockValidator.isValidStrings as jest.Mock).mockClear();
+        (mockValidator.isValidObject as jest.Mock).mockClear();
+        (mockValidator.isPropertyOf as jest.Mock).mockClear();
+        (mockValidator.isEmptyObject as jest.Mock).mockClear();
+        
+        
     });
 
     test('should resolve to User[] (without passwords) when getAllUsers() successfully retrieves users from the data source', async () => {
 
         // Arrange
         expect.hasAssertions();
-        UserRepository.prototype.getAll = jest.fn().mockReturnValue(mockUsers);
+        (mockRepo.getAll as jest.Mock).mockReturnValue(mockUsers)
 
         // Act
         let result = await sut.getAllUsers();
@@ -42,15 +110,15 @@ describe('userService', () => {
         // Assert
         expect(result).toBeTruthy();
         expect(result.length).toBe(5);
-        result.forEach(val => expect(val.password).toBeUndefined());
+        expect(mockRepo.getAll).toBeCalledTimes(1);
 
     });
 
     test('should reject with ResourceNotFoundError when getAllUsers fails to get any users from the data source', async () => {
 
         // Arrange
-        expect.assertions(1);
-        UserRepository.prototype.getAll = jest.fn().mockReturnValue([]);
+        expect.hasAssertions();
+        (mockRepo.getAll as jest.Mock).mockReturnValue([]);
 
         // Act
         try {
@@ -59,6 +127,7 @@ describe('userService', () => {
 
             // Assert
             expect(e instanceof ResourceNotFoundError).toBe(true);
+            expect(mockRepo.getAll).toBeCalledTimes(1);
         }
 
     });
@@ -66,21 +135,15 @@ describe('userService', () => {
     test('should resolve to User when getUserById is given a valid an known id', async () => {
 
         // Arrange
-        expect.assertions(3);
-        
-        Validator.isValidId = jest.fn().mockReturnValue(true);
-
-        UserRepository.prototype.getByID = jest.fn().mockImplementation((id: number) => {
-            return new Promise<User>((resolve) => resolve(mockUsers[id - 1]));
-        });
-
+        expect.hasAssertions();
+        (mockValidator.isValidId as jest.Mock).mockReturnValue(true);
+        (mockRepo.getById as jest.Mock).mockReturnValue(mockUsers[0]);
 
         // Act
         let result = await sut.getUserById(1);
 
         // Assert
         expect(result).toBeTruthy();
-        expect(result.id).toBe(1);
         expect(result.password).toBeUndefined();
 
     });
@@ -89,7 +152,7 @@ describe('userService', () => {
 
         // Arrange
         expect.hasAssertions();
-        UserRepository.prototype.getByID = jest.fn().mockReturnValue(false);
+        (mockValidator.isValidId as jest.Mock).mockReturnValue(false);
 
         // Act
         try {
@@ -106,7 +169,7 @@ describe('userService', () => {
 
         // Arrange
         expect.hasAssertions();
-        UserRepository.prototype.getByID = jest.fn().mockReturnValue(false);
+        (mockValidator.isValidId as jest.Mock).mockReturnValue(false);
 
         // Act
         try {
@@ -123,7 +186,7 @@ describe('userService', () => {
 
         // Arrange
         expect.hasAssertions();
-        UserRepository.prototype.getByID = jest.fn().mockReturnValue(false);
+        (mockValidator.isValidId as jest.Mock).mockReturnValue(false);
 
         // Act
         try {
@@ -140,7 +203,7 @@ describe('userService', () => {
 
         // Arrange
         expect.hasAssertions();
-        UserRepository.prototype.getByID = jest.fn().mockReturnValue(false);
+        (mockValidator.isValidId as jest.Mock).mockReturnValue(false);
 
         // Act
         try {
@@ -157,7 +220,9 @@ describe('userService', () => {
 
         // Arrange
         expect.hasAssertions();
-        UserRepository.prototype.getByID = jest.fn().mockReturnValue(true);
+        (mockValidator.isValidId as jest.Mock).mockReturnValue(true);
+        (mockValidator.isEmptyObject as jest.Mock).mockReturnValue(true);
+        (mockRepo.getById as jest.Mock).mockReturnValue({});
 
         // Act
         try {
@@ -170,379 +235,98 @@ describe('userService', () => {
 
     });
 
+    test('should resolve to User when getUserByUniqueKey is given a valid key and a valid/known value (id)', async () => {
 
+        // Arrange
+        expect.hasAssertions();
 
+        let mockUser = {...mockUsers[0]};
+        delete mockUser.password;
+        (mockValidator.isPropertyOf as jest.Mock).mockReturnValue(true);
 
-    //ALL OF THE BELOW: added from old user_repo tests, revise
+        /*
+            Sometimes you will need to mock a function which is a part of
+            the same module as the one you are testing. For these kinds
+            of cases, you can use Jest's spy feature.
+        */
+        let _spy = jest.spyOn(sut, 'getUserById');
+        _spy.mockClear().mockReturnValue(Promise.resolve(mockUser));
 
+        // Act
+        let result = await sut.getUserByUniqueKey({id: 1});
 
+        // Assert
+        expect(result).toBeTruthy();
+        expect(result.password).toBeUndefined();
+        expect(_spy).toBeCalledTimes(1);
 
-    //     test('should throw ResourceNotFoundError when getUserByUniqueKey is given an unknown username', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidStrings = jest.fn().mockReturnValue(true); //unknown username should still be a valid string, maybe I can implement isValidUser later?
-        
-    //         UserRepository.prototype.getUserByUniqueKey = jest.fn().mockReturnValue(false);
+    });
 
-    //         try {
-    //             //Act
-    //             await sut.getUserByUniqueKey('nobody');
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof ResourceNotFoundError).toBeTruthy();
-    //         }
-        
-    //     });
+    test('should resolve to User when getUserByUniqueKey is given a valid key and a valid/known value (username)', async () => {
 
-    //     test('should throw BadRequestError when getUserByUsername is given bad data', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidStrings = jest.fn().mockReturnValue(false);
-    //         try {
-    //             //Act
-    //             await sut.getUserByUniqueKey('');
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof BadRequestError).toBeTruthy();
-    //         }
-    //     });
+        // Arrange
+        expect.hasAssertions();
 
-    //     test('should throw AuthenticationError when getUserByCredentials is given incorrect credentials', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidStrings = jest.fn().mockReturnValue(true); //incorrect credentials are still valid strings.
-    //         try {
-    //             //Act
-    //             await sut.getUserByCredentials('aanderson', 'wrong');
-    //         } catch(e) {
-    //             //Assert
-    //             expect(e instanceof AuthenticationError).toBeTruthy();
-    //         }
-    //     });
+        let mockUser = {...mockUsers[0]};
+        delete mockUser.password;
+        (mockValidator.isPropertyOf as jest.Mock).mockReturnValue(true);
+        (mockValidator.isValidStrings as jest.Mock).mockReturnValue(true);
+        (mockRepo.getUserByUniqueKey as jest.Mock).mockReturnValue(mockUser);
+        (mockValidator.isEmptyObject as jest.Mock).mockReturnValue(false);
 
+        // Act
+        let result = await sut.getUserByUniqueKey({username: 'test'});
 
-    //     test('should throw BadRequestError when getUserByCredentials is given bad data', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidStrings = jest.fn().mockReturnValue(false);
-    //         try {
-    //             //Act
-    //             await sut.getUserByCredentials('', '');
-    //         } catch(e) {
-    //             //Assert
-    //             expect(e instanceof BadRequestError).toBeTruthy();
-    //         }
-    //     });
+        // Assert
+        expect(result).toBeTruthy();
+        expect(result.password).toBeUndefined();
+        expect(mockValidator.isPropertyOf).toBeCalledTimes(1);
+        expect(mockValidator.isValidStrings).toBeCalledTimes(1);
+        expect(mockRepo.getUserByUniqueKey).toBeCalledTimes(1);
+        expect(mockValidator.isEmptyObject).toBeCalledTimes(1);
 
-    //     test('should return a user (without password) that has a new id when save is given a valid new user', async () => {
-    //         //Arrange
-    //         expect.assertions(3);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(true);
-    //         //Act
-    //         let validMockUser = new User(0, 'test', 'test', 'test', 'test', 'test@revature.com', 'User');
-    //         let result = await sut.addNewUser(validMockUser);
-    //         //Assert
-    //         expect(result).toBeTruthy();
-    //         expect(result.id).toBeGreaterThan(0);
-    //         expect(result.password).toBeUndefined();
-    //     });
+    });
 
-    //     test('should invoke error callback when addNewUser is given a new user with a conflicting username', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(true);
-    //         //Act
-    //         let conflictingMockUser = new User(0, 'aanderson', 'test', 'test', 'test', 'test@revature.com', 'User');
-    //         try {
-    //             await sut.addNewUser(conflictingMockUser);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof ResourcePersistenceError).toBeTruthy();
-    //         }
+    test('should resolve to User when getUserByUniqueKey is given a valid key and an invalid value (id)', async () => {
 
-    //     });
+        // Arrange
+        expect.hasAssertions();
+        (mockValidator.isPropertyOf as jest.Mock).mockReturnValue(true);
+        let _spy = jest.spyOn(sut, 'getUserById')
+        _spy.mockClear().mockReturnValue(Promise.reject(new BadRequestError()));
 
-    //     test('should throw ResourcePersistenceError when save is given a new user with a conflicting email', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(true);
-    //         //Act
-    //         let conflictingMockUser = new User(0, 'a', 'a', 'a', 'a', 'aanderson@revature.com', 'User');
-    //         try {
-    //             await sut.addNewUser(conflictingMockUser);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof ResourcePersistenceError).toBeTruthy();
-    //         }
+        // Act
+        try {
+            await sut.getUserByUniqueKey({id: NaN});
+        } catch (e) {
 
-    //     });
+            // Assert
+            expect(e instanceof BadRequestError).toBe(true);
+            expect(_spy).toBeCalledTimes(1);
 
-    //     test('should throw BadRequestError when save is given an invalid new user (falsy username)', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(false);
-    //         //Act
-    //         let invalidMockUser = new User(0, '', 'a', 'a', 'a', 'a@revature.com', 'User');
-    //         try {
-    //             await sut.addNewUser(invalidMockUser);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof BadRequestError).toBeTruthy();
-    //         }
-    //     });
+        }
 
-    //     test('should throw BadRequestError when save is given an invalid new user (falsy password)', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(false);
-    //         //Act
-    //         let invalidMockUser = new User(0, 'a', '', 'a', 'a', 'a@revature.com', 'User');
-    //         try {
-    //             await sut.addNewUser(invalidMockUser);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof BadRequestError).toBeTruthy();
-    //         }
-    //     });
+    });
 
-    //     test('should throw BadRequestError when save is given an invalid new user (falsy firstName)', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(false);
-    //         //Act
-    //         let invalidMockUser = new User(0, 'a', 'a', '', 'a', 'a@revature.com', 'User');
-    //         try {
-    //             await sut.addNewUser(invalidMockUser);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof BadRequestError).toBeTruthy();
-    //         }
-    //     });
+    test('should resolve to User when getUserByUniqueKey is given a valid key and an invalid value (id)', async () => {
 
-    //     test('should throw BadRequestError when save is given an invalid new user (falsy lastName)', async () => {    
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(false);
-    //         //Act
-    //         let invalidMockUser = new User(0, 'a', 'a', 'a', 'a', '', 'User');
-    //         try {
-    //             await sut.addNewUser(invalidMockUser);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof BadRequestError).toBeTruthy();
-    //         }
-    //     });
+        // Arrange
+        expect.hasAssertions();
+        (mockValidator.isPropertyOf as jest.Mock).mockReturnValue(true);
+        let _spy = jest.spyOn(sut, 'getUserById')
+        _spy.mockClear().mockReturnValue(Promise.reject(new BadRequestError()));
 
+        // Act
+        try {
+            await sut.getUserByUniqueKey({id: NaN});
+        } catch (e) {
 
-    //     test('should throw BadRequestError when save is given a falsy user', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(false);
-    //         try {
-    //             //Act
-    //             await sut.addNewUser(null);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof BadRequestError).toBeTruthy();
-    //         }
-    //     });
+            // Assert
+            expect(e instanceof BadRequestError).toBe(true);
+            expect(_spy).toBeCalledTimes(1);
 
-    //     test('should throw ResourceNotFoundError when update is given an updated user with an unknown id', async () => {
-    //         //Arrnage
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(true);
-    //         Validator.isValidId = jest.fn().mockReturnValue(true); //unknown id's are still valid
-    //         //Act
-    //         let updatedUser = new User(999999, 'updated', 'updated', 'updated', 'updated', 'updated@revature.com', 'User');
-    //         try {
-    //             await sut.updateUser(updatedUser);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof ResourceNotFoundError).toBeTruthy();
-    //         }
-    //     });
+        }
 
-    //     test('should throw BadRequestError when update is given an updated user with an invalid id (decimal)', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(true);
-    //         Validator.isValidId = jest.fn().mockReturnValue(false);
-    //         //Act
-    //         let updatedUser = new User(3.14, 'updated', 'updated', 'updated', 'updated', 'updated@revature.com', 'User');
-    //         try {
-    //             await sut.updateUser(updatedUser);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof BadRequestError).toBeTruthy();
-    //         }
-    //     });
-
-    //     test('should throw BadRequestError when update is given an updated user with an invalid id (negative)', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(true);
-    //         Validator.isValidId = jest.fn().mockReturnValue(false);
-    //         //Act
-    //         let updatedUser = new User(-1, 'updated', 'updated', 'updated', 'updated', 'updated@revature.com', 'User');
-    //         try {
-    //             await sut.updateUser(updatedUser);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof BadRequestError).toBeTruthy();
-    //         }
-    //     });
-
-    //     test('should throw ResourcePersistenceError when update is given an updated user with an updated username', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(true);
-    //         Validator.isValidId = jest.fn().mockReturnValue(true);
-    //         //Act
-    //         let updatedUser = new User(1, 'updated', 'updated', 'updated', 'updated', 'updated@revature.com', 'User');
-    //         try {
-    //             await sut.updateUser(updatedUser);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof ResourcePersistenceError).toBeTruthy();
-    //         }
-    //     });
-
-    //     test('should throw ResourcePersistenceError when update is given an updated user with a conflicting username', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(true);
-    //         Validator.isValidId = jest.fn().mockReturnValue(true);
-    //         //Act
-    //         let updatedUser = new User(1, 'bbailey', 'updated', 'updated', 'updated', 'updated@revature.com', 'User');
-    //         try {
-    //             await sut.updateUser(updatedUser);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof ResourcePersistenceError).toBeTruthy();
-    //         }
-    //     });
-
-    //     test('should throw ResourcePersistenceError when update is given an updated user with a conflicting email', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(true);
-    //         Validator.isValidId = jest.fn().mockReturnValue(true);
-    //         //Act
-    //         let updatedUser = new User(1, 'aanderson', 'updated', 'updated', 'updated', 'bbailey@revature.com', 'User');
-    //         try {
-    //             await sut.updateUser(updatedUser);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof ResourcePersistenceError).toBeTruthy();
-    //         }
-    //     });
-
-    //     test('should throw BadRequestError when update is given an invalid updated user (falsy username)', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(false);
-    //         Validator.isValidId = jest.fn().mockReturnValue(true);
-    //         //Act
-    //         let updatedUser = new User(1, '', 'updated', 'updated', 'updated', 'bbailey@revature.com', 'User');
-    //         try {
-    //             await sut.updateUser(updatedUser);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof BadRequestError).toBeTruthy();
-    //         }
-    //     });
-
-    //     test('should throw BadRequestError when update is given an invalid updated user (falsy password)', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(false);
-    //         Validator.isValidId = jest.fn().mockReturnValue(true);
-    //         //Act
-    //         let updatedUser = new User(1, 'aanderson', '', 'updated', 'updated', 'bbailey@revature.com', 'User');
-    //         try {
-    //             await sut.updateUser(updatedUser);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof BadRequestError).toBeTruthy();
-    //         }
-    //     });
-
-    //     test('should throw BadRequestError when update is given an invalid updated user (falsy firstName)', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(false);
-    //         Validator.isValidId = jest.fn().mockReturnValue(true);
-    //         //Act
-    //         let updatedUser = new User(1, 'aanderson', 'updated', '', 'updated', 'bbailey@revature.com', 'User');
-    //         try {
-    //             await sut.updateUser(updatedUser);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof BadRequestError).toBeTruthy();
-    //         }
-    //     });
-
-    //     test('should throw BadRequestError when update is given an invalid updated user (falsy lastName)', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(false);
-    //         Validator.isValidId = jest.fn().mockReturnValue(true);
-    //         //Act
-    //         let updatedUser = new User(1, 'aanderson', 'updated', 'updated', '', 'bbailey@revature.com', 'User');
-    //         try {
-    //             await sut.updateUser(updatedUser);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof BadRequestError).toBeTruthy();
-    //         }
-    //     });
-
-    //     test('should throw BadRequestError when update is given an invalid updated user (falsy email)', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(false);
-    //         Validator.isValidId = jest.fn().mockReturnValue(true);
-    //         //Act
-    //         let updatedUser = new User(1, 'aanderson', 'updated', 'updated', 'updated', '', 'User');
-    //         try {
-    //             await sut.updateUser(updatedUser);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof BadRequestError).toBeTruthy();
-    //         }
-    //     });
-
-
-    //     test('should throw BadRequestError when update is given an falsy user', async () => {
-    //         //Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidObject = jest.fn().mockReturnValue(false);
-    //         Validator.isValidId = jest.fn().mockReturnValue(true);
-    //         try {
-    //             //Act
-    //             await sut.updateUser(null);
-    //         } catch (e) {
-    //             //Assert
-    //             expect(e instanceof BadRequestError).toBeTruthy();
-    //         }
-    //     });
-
-    //     test('should throw BadRequestError when getById is given an invalid id', async () => {
-
-    //         // Arrange
-    //         expect.assertions(1);
-    //         Validator.isValidId = jest.fn().mockReturnValue(false);
-
-    //         // Act
-    //         try {
-    //             //Act
-    //             await sut.getUserById(-1);
-    //         } catch (e) {
-
-    //             // Assert
-    //             expect(e instanceof BadRequestError).toBeTruthy();
-    //         }
-    //     });
-
+    });
 
 });
