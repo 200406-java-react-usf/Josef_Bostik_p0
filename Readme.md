@@ -2,9 +2,9 @@ The purpose of this project is to create a basic online ordering system API, inc
 
 [POST] /auth : Authenticates user
 
-[GET] /users : Gets all users \n
-[GET] /users/:id : Gets user :id \n
-[GET] /users/:id/orders : Gets all the users orders with the specified :id
+[GET] /users : Gets all users <br />
+[GET] /users/:id : Gets user :id  <br />
+[GET] /users/:id/orders : Gets all the users orders with the specified :id <br />
 [POST] /users : Posts a user given a JSON with user properties
 [DELETE] /users/:id : Deletes a user with serial :id
 [PATCH] /users/:id : Patches a user given a JSON with user properties
