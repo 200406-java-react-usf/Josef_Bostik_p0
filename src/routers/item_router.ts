@@ -32,12 +32,13 @@ ItemRouter.get('/:id', async (req, resp) => {
 /**
  * Implement add item 
  */
-ItemRouter.post('', async (req, resp) => {
+ItemRouter.post('/:id', async (req, resp) => {
 
+    const id = +req.params.id;
     console.log('Item POST REQUEST RECEIVED AT /items');
     console.log(req.body);
     try {
-        let newItem = await itemService.addNewItem(req.body);
+        let newItem = await itemService.addNewItem(req.body, id);
         return resp.status(201).json(newItem).send();
     } catch (e) {
         return resp.status(e.statusCode).json(e).send();

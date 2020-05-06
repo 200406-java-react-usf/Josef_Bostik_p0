@@ -106,7 +106,7 @@ export async function getUserByCredentials(un: string, pw: string): Promise<User
 
     try {
         const user = {...await userRepo.getUserByCredentials(un, pw)};
-        return user;  
+        return removePassword(user);  
     } catch (e) {
         return e;
     }
@@ -234,8 +234,9 @@ export async function deleteById(id: number): Promise<boolean> {
 /**
  * Returns a boolean value based on whether or not a username is available in the database.
  * An id parameter is passed optionally to ignore a specified serial number.
+ * Exported for testing purposes
  */
-async function isUsernameAvailable(username: string, id?: number): Promise<boolean> {
+export async function isUsernameAvailable(username: string, id?: number): Promise<boolean> {
 
     try {
         if (await (await getUserByUniqueKey({'username': username})).id == id) {
@@ -254,8 +255,9 @@ async function isUsernameAvailable(username: string, id?: number): Promise<boole
 /**
  * Returns a boolean value based on whether or not an email is available in the database.
  * An id parameter is passed optionally to ignore a specified serial number.
+ * Exported for testing purposes
  */
-async function isEmailAvailable(email: string, id?: number): Promise<boolean> {
+export async function isEmailAvailable(email: string, id?: number): Promise<boolean> {
     
     try {
         if (await (await getUserByUniqueKey({'email': email})).id == id) {

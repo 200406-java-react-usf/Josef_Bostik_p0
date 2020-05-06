@@ -35,7 +35,7 @@ export async function getItemById(id: number): Promise<Item> {
         throw new BadRequestError();
     }
 
-    let item = await itemRepo.getByID(id);
+    let item = await itemRepo.getById(id);
 
     if (isEmptyObject(item)) {
         throw new ResourceNotFoundError();
@@ -54,8 +54,10 @@ export async function getItemById(id: number): Promise<Item> {
 /**
  * Adds a new item to the database
  */
-export async function addNewItem(newItem: Item): Promise<Item> {
+export async function addNewItem(newItem: Item, orderId: number): Promise<Item> {
     
+    //May want to check if a order is found by the specified id
+
     if (!isValidObject(newItem, 'id')) {
         throw new BadRequestError('Invalid property values found in provided user.');
     }
@@ -64,7 +66,7 @@ export async function addNewItem(newItem: Item): Promise<Item> {
     //check to see if the item exists in the database before 
     //adding new ones.
 
-    const persistedItem = await itemRepo.save(newItem);
+    const persistedItem = await itemRepo.save(newItem, orderId);
 
     return persistedItem;
 

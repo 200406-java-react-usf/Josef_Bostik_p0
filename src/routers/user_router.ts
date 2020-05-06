@@ -5,6 +5,7 @@ import { ParsedUrlQuery } from 'querystring';
 import { isEmptyObject } from '../util/validator';
 import { adminGuard } from '../middleware/auth_middleware';
 import * as userService from '../services/user_service';
+import * as orderService from '../services/order_service';
 
 export const UserRouter = express.Router();
 
@@ -33,6 +34,16 @@ UserRouter.get('/:id', adminGuard, async (req, resp) => {
     const id = +req.params.id;
     try {
         let payload = await userService.getUserById(id);
+        return resp.status(200).json(payload);
+    } catch (e) {
+        return resp.status(e.statusCode).json(e).send();
+    }
+});
+
+UserRouter.get('/:id/orders', adminGuard, async (req, resp) => {
+    const id = +req.params.id;
+    try {
+        let payload = await orderService.getOrdersByUserId(id);
         return resp.status(200).json(payload);
     } catch (e) {
         return resp.status(e.statusCode).json(e).send();

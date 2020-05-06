@@ -59,13 +59,13 @@ export async function getAll(): Promise<Item[]> {
     }
 }
 
-export async function  getByID(id: number): Promise<Item> {
+export async function getById(id: number): Promise<Item> {
 
     let client: PoolClient;
 
     try {
         client = await connectionPool.connect();
-        let sql = `${baseQuery} where au.id = $1`;
+        let sql = `${baseQuery} where ai.id = $1`;
         let rs = await client.query(sql, [id]);
         return mapItemResultSet(rs.rows[0]);
     } catch (e) {
@@ -75,17 +75,23 @@ export async function  getByID(id: number): Promise<Item> {
     }
 }
 
-export async function  save(newItem: Item): Promise<Item> {
+export async function save(newItem: Item, orderId: number): Promise<Item> {
     let client: PoolClient;
 
     try {
         client = await connectionPool.connect();
         let sql = `
             insert into app_items (name, description, cost, amount) 
-            values ($1, $2, $3, $4) returning id
+            values ($1, $2, $3, $4) returning id;
         `;
         let rs = await client.query(sql, [newItem.name, newItem.description, newItem.cost, newItem.amount]);
-        return mapItemResultSet(rs.rows[0]);
+        let itemOut = mapItemResultSet(rs.rows[0]);
+        let jcsql = `
+            insert into order_item_jc (orderid, itemid)
+            values ($1, $2)
+        `
+        await client.query(jcsql, [orderId, itemOut.id]);
+        return itemOut;
     } catch (e) {
         throw new InternalServerError();
     } finally {
@@ -118,8 +124,13 @@ export async function  deleteById(id: number): Promise<boolean> {
 
     try {
         client = await connectionPool.connect();
+        
+        let sqljc = `
+        delete from order_item_jc where itemid = $1
+        `;
+        await client.query(sqljc, [id]);
         let sql = `
-            delete from app_items where id = $1
+        delete from app_items where id = $1
         `;
         await client.query(sql, [id]);
         return true;

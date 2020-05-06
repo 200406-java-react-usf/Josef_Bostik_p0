@@ -29,6 +29,16 @@ OrderRouter.get('/:id', async (req, resp) => {
     }
 });
 
+OrderRouter.get('/:id/items', async (req, resp) => {
+    const id = +req.params.id;
+    try {
+        let payload = await orderService.getItemsByOrderId(id);
+        return resp.status(200).json(payload);
+    } catch (e) {
+        return resp.status(e.statusCode).json(e).send();
+    }
+});
+
 /**
  * Implement add order
  */
