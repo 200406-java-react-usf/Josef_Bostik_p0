@@ -1,7 +1,7 @@
 import express from 'express';
 // import { ItemServiceInstance } from '../config/app';
 import { adminGuard } from '../middleware/auth_middleware';
-import * as itemService from '../services/item_service'
+import * as itemService from '../services/item_service';
 
 export const ItemRouter = express.Router();
 

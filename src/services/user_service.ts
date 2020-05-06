@@ -8,11 +8,9 @@ import { isValidId, isValidStrings, isValidObject, isPropertyOf, isEmptyObject }
 import { 
     BadRequestError, 
     ResourceNotFoundError, 
-    NotImplementedError, 
     ResourcePersistenceError, 
     AuthenticationError 
 } from '../errors/errors';
-import { query } from 'express';
 import { Role } from '../models/role';
 
 
@@ -173,7 +171,7 @@ export async function addNewUser(newUser: User): Promise<User> {
         return removePassword(persistedUser);
 
     } catch (e) {
-        throw e
+        throw e;
     }
 }
 

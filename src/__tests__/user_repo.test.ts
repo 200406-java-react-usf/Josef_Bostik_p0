@@ -17,14 +17,14 @@ jest.mock('..', () => {
         connectionPool: {
             connect: jest.fn()
         }
-    }
+    };
 });
 
 // The result-set-mapper module also needs to be mocked
 jest.mock('../util/result-set-mapper', () => {
     return {
         mapUserResultSet: jest.fn()
-    }
+    };
 });
 
 describe('userRepo', () => {
@@ -53,10 +53,10 @@ describe('userRepo', () => {
                                 role_id: 1
                             }
                         ]
-                    }
+                    };
                 }), 
                 release: jest.fn()
-            }
+            };
         });
         (mockMapper.mapUserResultSet as jest.Mock).mockClear();
     });
@@ -86,9 +86,9 @@ describe('userRepo', () => {
         expect.hasAssertions();
         (mockConnect as jest.Mock).mockImplementation(() => {
             return {
-                query: jest.fn().mockImplementation(() => { return { rows: [] } }), 
+                query: jest.fn().mockImplementation(() => { return { rows: [] }; }), 
                 release: jest.fn()
-            }
+            };
         });
 
         // Act
@@ -125,7 +125,7 @@ describe('userRepo', () => {
         let mockUser = new User(1, 'un', 'pw', 'fn', 'ln', 'email', new Role(4));
         (mockMapper.mapUserResultSet as jest.Mock).mockReturnValue(mockUser);
 
-        let result = await sut.getUserByUniqueKey("username", 'un');
+        let result = await sut.getUserByUniqueKey('username', 'un');
 
         expect(result).toBeTruthy();
         expect(result instanceof User).toBe(true);

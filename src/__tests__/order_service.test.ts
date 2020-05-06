@@ -3,7 +3,7 @@ import * as mockRepo from '../repos/order_repo';
 import * as mockValidator from '../util/validator';
 
 import { Order } from '../models/order';
-import { ResourceNotFoundError, BadRequestError, AuthenticationError, ResourcePersistenceError } from '../errors/errors';
+import { ResourceNotFoundError, BadRequestError} from '../errors/errors';
 import { Item } from '../models/item';
 
 /*
@@ -35,7 +35,7 @@ jest.mock('../repos/order_repo', () => {
         deleteById: jest.fn(),
         getOrdersByUserId: jest.fn(),
         getItemsByOrderId: jest.fn()
-    }
+    };
 });
 
 jest.mock('../util/validator', () => {
@@ -45,7 +45,7 @@ jest.mock('../util/validator', () => {
         isValidObject: jest.fn(),
         isPropertyOf: jest.fn(),
         isEmptyObject: jest.fn()
-    }
+    };
 });
 
 describe('orderService', () => {
@@ -99,7 +99,7 @@ describe('orderService', () => {
 
         // Arrange
         expect.hasAssertions();
-        (mockRepo.getAll as jest.Mock).mockReturnValue(mockOrders)
+        (mockRepo.getAll as jest.Mock).mockReturnValue(mockOrders);
 
         // Act
         let result = await sut.getAllOrders();
@@ -109,7 +109,7 @@ describe('orderService', () => {
         expect(result.length).toBe(2);
         expect(mockRepo.getAll).toBeCalledTimes(1);
 
-     });
+    });
 
     test('should reject with ResourceNotFoundError when getAllOrders fails to get any orders from the data source', async () => {
 
@@ -145,7 +145,7 @@ describe('orderService', () => {
         expect(result.length).toBe(2);
         expect(mockRepo.getOrdersByUserId).toBeCalledTimes(1);
 
-     });
+    });
 
     test('should reject with ResourceNotFoundError when getOrdersByUserId fails to get any orders from the data source', async () => {
 
@@ -190,7 +190,7 @@ describe('orderService', () => {
 
         // Arrange
         expect.hasAssertions();
-        let mockItem = [new Item(1, "name", "desc", 1.00, 1)];
+        let mockItem = [new Item(1, 'name', 'desc', 1.00, 1)];
         (mockRepo.getItemsByOrderId as jest.Mock).mockReturnValue(mockItem);
         (mockValidator.isValidId as jest.Mock).mockReturnValue(true);
         (mockValidator.isEmptyObject as jest.Mock).mockReturnValue(false);
@@ -198,13 +198,13 @@ describe('orderService', () => {
         // Act
         let result = await sut.getItemsByOrderId(1);
         
-        console.log(result + "--------------------------------------------------------------------")
+        console.log(result + '--------------------------------------------------------------------');
         // Assert
         expect(result).toBeTruthy();
         expect(result.length).toBe(1);
         expect(mockRepo.getItemsByOrderId).toBeCalledTimes(1);
 
-     });
+    });
 
     test('should resolve to Order when getOrderById is given a valid an known id', async () => {
 

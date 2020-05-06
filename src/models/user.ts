@@ -9,7 +9,7 @@
  *      - openOrders
  *      - closedOrders
  */
-import { Role } from "./role";
+import { Role } from './role';
 
 export class User {
 

@@ -3,7 +3,7 @@ import * as mockRepo from '../repos/user_repo';
 import * as mockValidator from '../util/validator';
 
 import { User } from '../models/user';
-import { ResourceNotFoundError, BadRequestError, AuthenticationError, ResourcePersistenceError } from '../errors/errors';
+import { ResourceNotFoundError, BadRequestError, AuthenticationError} from '../errors/errors';
 import { Role } from '../models/role';
 
 /*
@@ -35,7 +35,7 @@ jest.mock('../repos/user_repo', () => {
         save: jest.fn(),
         update: jest.fn(),
         deleteById: jest.fn()
-    }
+    };
 });
 
 jest.mock('../util/validator', () => {
@@ -45,7 +45,7 @@ jest.mock('../util/validator', () => {
         isValidObject: jest.fn(),
         isPropertyOf: jest.fn(),
         isEmptyObject: jest.fn()
-    }
+    };
 });
 
 describe('userService', () => {
@@ -102,7 +102,7 @@ describe('userService', () => {
 
         // Arrange
         expect.hasAssertions();
-        (mockRepo.getAll as jest.Mock).mockReturnValue(mockUsers)
+        (mockRepo.getAll as jest.Mock).mockReturnValue(mockUsers);
 
         // Act
         let result = await sut.getAllUsers();
@@ -292,7 +292,7 @@ describe('userService', () => {
         // Arrange
         expect.hasAssertions();
         (mockValidator.isPropertyOf as jest.Mock).mockReturnValue(true);
-        let _spy = jest.spyOn(sut, 'getUserById')
+        let _spy = jest.spyOn(sut, 'getUserById');
         _spy.mockClear().mockReturnValue(Promise.reject(new BadRequestError()));
 
         // Act
@@ -313,7 +313,7 @@ describe('userService', () => {
         // Arrange
         expect.hasAssertions();
         (mockValidator.isPropertyOf as jest.Mock).mockReturnValue(true);
-        let _spy = jest.spyOn(sut, 'getUserById')
+        let _spy = jest.spyOn(sut, 'getUserById');
         _spy.mockClear().mockReturnValue(Promise.reject(new BadRequestError()));
 
         // Act
@@ -412,7 +412,7 @@ describe('userService', () => {
         // Arrange
         expect.hasAssertions();
 
-        let mockUser = new User(6, 'jdoe', 'password', 'john', 'doe', 'jdoe@gmail.com', new Role(3))
+        let mockUser = new User(6, 'jdoe', 'password', 'john', 'doe', 'jdoe@gmail.com', new Role(3));
         delete mockUser.password;
         (mockValidator.isPropertyOf as jest.Mock).mockReturnValue(true);
         (mockValidator.isValidStrings as jest.Mock).mockReturnValue(true);
@@ -488,7 +488,7 @@ describe('userService', () => {
         // Arrange
         expect.hasAssertions();
 
-        let mockUser = new User(null, 'jdoe', 'password', 'john', 'doe', 'jdoe@gmail.com', new Role(3))
+        let mockUser = new User(null, 'jdoe', 'password', 'john', 'doe', 'jdoe@gmail.com', new Role(3));
         delete mockUser.password;
         (mockValidator.isPropertyOf as jest.Mock).mockReturnValue(true);
         (mockValidator.isValidStrings as jest.Mock).mockReturnValue(true);

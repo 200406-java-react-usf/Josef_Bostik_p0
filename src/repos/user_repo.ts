@@ -1,5 +1,4 @@
 import { User } from '../models/user';
-import { CrudRepository } from './crud_repo';
 import {
     InternalServerError
 } from '../errors/errors';

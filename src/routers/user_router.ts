@@ -1,7 +1,6 @@
 import url from 'url';
 import express from 'express';
 // import {UserServiceInstance} from '../config/app';
-import { ParsedUrlQuery } from 'querystring';
 import { isEmptyObject } from '../util/validator';
 import { adminGuard } from '../middleware/auth_middleware';
 import * as userService from '../services/user_service';

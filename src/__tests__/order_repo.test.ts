@@ -17,7 +17,7 @@ jest.mock('..', () => {
         connectionPool: {
             connect: jest.fn()
         }
-    }
+    };
 });
 
 // The result-set-mapper module also needs to be mocked
@@ -25,7 +25,7 @@ jest.mock('../util/result-set-mapper', () => {
     return {
         mapOrderResultSet: jest.fn(),
         mapItemResultSet: jest.fn()
-    }
+    };
 });
 
 describe('orderRepo', () => {
@@ -52,10 +52,10 @@ describe('orderRepo', () => {
                                 destination: 'New York City, New York'
                             }
                         ]
-                    }
+                    };
                 }), 
                 release: jest.fn()
-            }
+            };
         });
         (mockMapper.mapOrderResultSet as jest.Mock).mockClear();
         (mockMapper.mapItemResultSet as jest.Mock).mockClear();
@@ -86,9 +86,9 @@ describe('orderRepo', () => {
         expect.hasAssertions();
         (mockConnect as jest.Mock).mockImplementation(() => {
             return {
-                query: jest.fn().mockImplementation(() => { return { rows: [] } }), 
+                query: jest.fn().mockImplementation(() => { return { rows: [] }; }), 
                 release: jest.fn()
-            }
+            };
         });
 
         // Act
@@ -127,9 +127,9 @@ describe('orderRepo', () => {
         expect.hasAssertions();
         (mockConnect as jest.Mock).mockImplementation(() => {
             return {
-                query: jest.fn().mockImplementation(() => { return { rows: [] } }), 
+                query: jest.fn().mockImplementation(() => { return { rows: [] }; }), 
                 release: jest.fn()
-            }
+            };
         });
 
         // Act
@@ -148,7 +148,7 @@ describe('orderRepo', () => {
         // Arrange
         expect.hasAssertions();
 
-        let mockItem = new Item(1, "name", "desc", 1.00, 1);
+        let mockItem = new Item(1, 'name', 'desc', 1.00, 1);
         (mockMapper.mapItemResultSet as jest.Mock).mockReturnValue(mockItem);
 
         // Act
@@ -168,9 +168,9 @@ describe('orderRepo', () => {
         expect.hasAssertions();
         (mockConnect as jest.Mock).mockImplementation(() => {
             return {
-                query: jest.fn().mockImplementation(() => { return { rows: [] } }), 
+                query: jest.fn().mockImplementation(() => { return { rows: [] }; }), 
                 release: jest.fn()
-            }
+            };
         });
 
         // Act

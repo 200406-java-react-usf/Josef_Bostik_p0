@@ -8,7 +8,6 @@
  *      CREATE ORDERCOST METHOD
  */
 import { Order } from '../models/order';
-import { CrudRepository } from './crud_repo';
 import {
     InternalServerError
 } from '../errors/errors';

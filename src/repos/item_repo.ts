@@ -25,7 +25,6 @@
  */
 
 import { Item } from '../models/item';
-import { CrudRepository } from './crud_repo';
 import {
     InternalServerError
 } from '../errors/errors';
@@ -100,7 +99,7 @@ export async function save(newItem: Item, orderId: number): Promise<Item> {
         let jcsql = `
             insert into order_item_jc (orderid, itemid)
             values ($1, $2)
-        `
+        `;
         await client.query(jcsql, [orderId, itemOut.id]);
         return itemOut;
     } catch (e) {

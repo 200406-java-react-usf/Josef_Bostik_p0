@@ -1,7 +1,7 @@
 import express from 'express';
 // import { UserServiceInstance } from '../config/app';
 import { Principal } from '../dtos/principal';
-import * as userService from '../services/user_service'
+import * as userService from '../services/user_service';
 
 export const AuthRouter = express.Router();
 

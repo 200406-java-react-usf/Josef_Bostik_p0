@@ -16,14 +16,14 @@ jest.mock('..', () => {
         connectionPool: {
             connect: jest.fn()
         }
-    }
+    };
 });
 
 // The result-set-mapper module also needs to be mocked
 jest.mock('../util/result-set-mapper', () => {
     return {
         mapItemResultSet: jest.fn()
-    }
+    };
 });
 
 describe('itemRepo', () => {
@@ -44,16 +44,16 @@ describe('itemRepo', () => {
                         rows: [
                             {
                                 id: 1,
-                                itemName: "Water",
-                                description: "Generic Brand",
+                                itemName: 'Water',
+                                description: 'Generic Brand',
                                 cost: 0.99,
                                 amount: 1
                             }
                         ]
-                    }
+                    };
                 }), 
                 release: jest.fn()
-            }
+            };
         });
         (mockMapper.mapItemResultSet as jest.Mock).mockClear();
     });
@@ -63,7 +63,7 @@ describe('itemRepo', () => {
         // Arrange
         expect.hasAssertions();
 
-        let mockItem = new Item(1, "name", "desc", 1.00, 1);
+        let mockItem = new Item(1, 'name', 'desc', 1.00, 1);
         (mockMapper.mapItemResultSet as jest.Mock).mockReturnValue(mockItem);
 
         // Act
@@ -83,9 +83,9 @@ describe('itemRepo', () => {
         expect.hasAssertions();
         (mockConnect as jest.Mock).mockImplementation(() => {
             return {
-                query: jest.fn().mockImplementation(() => { return { rows: [] } }), 
+                query: jest.fn().mockImplementation(() => { return { rows: [] }; }), 
                 release: jest.fn()
-            }
+            };
         });
 
         // Act
@@ -104,7 +104,7 @@ describe('itemRepo', () => {
         // Arrange
         expect.hasAssertions();
 
-        let mockItem = new Item(1, "name", "desc", 1.00, 1);
+        let mockItem = new Item(1, 'name', 'desc', 1.00, 1);
         (mockMapper.mapItemResultSet as jest.Mock).mockReturnValue(mockItem);
 
         // Act
@@ -121,7 +121,7 @@ describe('itemRepo', () => {
     test('Should resolve to an Item object when save retrieves a valid item object', async () => {
         expect.hasAssertions();
         
-        let mockItem = new Item(1, "name", "desc", 1.00, 1);
+        let mockItem = new Item(1, 'name', 'desc', 1.00, 1);
         (mockMapper.mapItemResultSet as jest.Mock).mockReturnValue(mockItem);
 
         let result = await sut.save(mockItem, 1);
@@ -133,7 +133,7 @@ describe('itemRepo', () => {
     test('Should resolve to true when deleteById deletes a valid item object', async () => {
         expect.hasAssertions();
         
-        let mockItem = new Item(1, "name", "desc", 1.00, 1);
+        let mockItem = new Item(1, 'name', 'desc', 1.00, 1);
         (mockMapper.mapItemResultSet as jest.Mock).mockReturnValue(mockItem);
 
         let result = await sut.deleteById(1);
@@ -144,7 +144,7 @@ describe('itemRepo', () => {
     test('Should resolve to true when update updates a valid item object', async () => {
         expect.hasAssertions();
         
-        let mockItem = new Item(1, "name", "desc", 1.00, 1);
+        let mockItem = new Item(1, 'name', 'desc', 1.00, 1);
         (mockMapper.mapItemResultSet as jest.Mock).mockReturnValue(mockItem);
 
         let result = await sut.update(mockItem);

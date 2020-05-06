@@ -3,7 +3,7 @@ import * as mockRepo from '../repos/item_repo';
 import * as mockValidator from '../util/validator';
 
 import { Item } from '../models/item';
-import { ResourceNotFoundError, BadRequestError, AuthenticationError, ResourcePersistenceError } from '../errors/errors';
+import { ResourceNotFoundError, BadRequestError } from '../errors/errors';
 
 /*
     In order to properly mock all of the functions exported by
@@ -32,7 +32,7 @@ jest.mock('../repos/item_repo', () => {
         save: jest.fn(),
         update: jest.fn(),
         deleteById: jest.fn()
-    }
+    };
 });
 
 jest.mock('../util/validator', () => {
@@ -42,18 +42,18 @@ jest.mock('../util/validator', () => {
         isValidObject: jest.fn(),
         isPropertyOf: jest.fn(),
         isEmptyObject: jest.fn()
-    }
+    };
 });
 
 describe('itemService', () => {
 
     let mockItems = [
-    new Item(1, 'GoldGate Anti-cavity', 'GoldGate Toothpaste 12oz', 3.99,3),
-    new Item(2, 'MalWart H2O', 'Water 1L', 0.99, 50),
-    new Item(3, 'Generic Brand Pasta', 'Spaghetti 0.5 lbs', 3.99, 25),
-    new Item(4, 'BlunderBread', 'White bread', 2.99, 20),
-    new Item(5, 'Jimmy Lean\'s Ham', 'Thin sliced ham 24 slices', 5.99, 10),
-    new Item(6, 'I Can\'t Believe It\'s Actually Butter', 'Downfield brand butter 8oz', 3.99, 100)
+        new Item(1, 'GoldGate Anti-cavity', 'GoldGate Toothpaste 12oz', 3.99,3),
+        new Item(2, 'MalWart H2O', 'Water 1L', 0.99, 50),
+        new Item(3, 'Generic Brand Pasta', 'Spaghetti 0.5 lbs', 3.99, 25),
+        new Item(4, 'BlunderBread', 'White bread', 2.99, 20),
+        new Item(5, 'Jimmy Lean\'s Ham', 'Thin sliced ham 24 slices', 5.99, 10),
+        new Item(6, 'I Can\'t Believe It\'s Actually Butter', 'Downfield brand butter 8oz', 3.99, 100)
     ];
 
     beforeEach(() => {
@@ -98,7 +98,7 @@ describe('itemService', () => {
 
         // Arrange
         expect.hasAssertions();
-        (mockRepo.getAll as jest.Mock).mockReturnValue(mockItems)
+        (mockRepo.getAll as jest.Mock).mockReturnValue(mockItems);
 
         // Act
         let result = await sut.getAllItems();
@@ -108,7 +108,7 @@ describe('itemService', () => {
         expect(result.length).toBe(6);
         expect(mockRepo.getAll).toBeCalledTimes(1);
 
-     });
+    });
 
     test('should reject with ResourceNotFoundError when getAllItems fails to get any items from the data source', async () => {
 
