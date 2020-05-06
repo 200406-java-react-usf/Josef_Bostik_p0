@@ -27,7 +27,11 @@ let baseQuery = `
     from app_orders ao
 `;
 
-export async function  getAll(): Promise<Order[]> {
+/*
+    Gets everything in the Order database
+*/
+
+export async function getAll(): Promise<Order[]> {
 
     let client: PoolClient;
 
@@ -43,7 +47,11 @@ export async function  getAll(): Promise<Order[]> {
     }
 }
 
-export async function  getById(id: number): Promise<Order> {
+/*
+    Gets all items by the specified serial Id
+*/
+
+export async function getById(id: number): Promise<Order> {
     let client: PoolClient;
 
     try {
@@ -57,6 +65,10 @@ export async function  getById(id: number): Promise<Order> {
         client && client.release();
     }
 }
+
+/*
+    Gets all orders assigned to the specified User
+*/
 
 export async function getOrdersByUserId(id: number): Promise<Order[]> {
     let client: PoolClient;
@@ -73,7 +85,11 @@ export async function getOrdersByUserId(id: number): Promise<Order[]> {
     }
 }
 
-export async function  getItemsByOrderId(id: number): Promise<Item[]> {
+/*
+    Gets All Items assigned to the speicified Order
+*/
+
+export async function getItemsByOrderId(id: number): Promise<Item[]> {
     let client: PoolClient;
 
     try {
@@ -84,7 +100,8 @@ export async function  getItemsByOrderId(id: number): Promise<Item[]> {
                 order_item_jc as j
                 on j.itemid = i.id left join
                 app_orders as o
-                on j.orderid = $1;
+                on j.orderid = $1
+            where o.id = $1;
         `;
         let rs = await client.query(sql, [id]);
         return rs.rows.map(mapItemResultSet);
@@ -95,7 +112,11 @@ export async function  getItemsByOrderId(id: number): Promise<Item[]> {
     }
 }
 
-export async function  save(newOrder: Order): Promise<Order> {
+/*
+    Saves an Order to a new unique serial number
+ */
+
+export async function save(newOrder: Order): Promise<Order> {
     let client: PoolClient;
 
     try {
@@ -112,8 +133,10 @@ export async function  save(newOrder: Order): Promise<Order> {
         client && client.release();
     }
 }
-
-export async function  update(updatedOrder: Order): Promise<boolean> {
+/*
+    Updates an Order based on a new Order object
+*/
+export async function update(updatedOrder: Order): Promise<boolean> {
     let client: PoolClient;
 
     try {
@@ -134,11 +157,19 @@ export async function  update(updatedOrder: Order): Promise<boolean> {
     }
 }
 
-export async function  deleteById(id: number): Promise<boolean> {
+
+/*
+    Deletes an order by its specified serial number
+*/
+export async function deleteById(id: number): Promise<boolean> {
     let client: PoolClient;
 
     try {
         client = await connectionPool.connect();
+        let sqljc = `
+            delete from order_item_jc where orderid = $1
+        `;
+        await client.query(sqljc, [id]);
         let sql = `
             delete from app_orders where id = $1
         `;

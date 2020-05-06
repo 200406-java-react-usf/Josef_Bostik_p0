@@ -44,6 +44,10 @@ let baseQuery = `
     from app_items ai
 `;
 
+/*
+    Gets everything in the Item database
+*/
+
 export async function getAll(): Promise<Item[]> {
     let client: PoolClient;
 
@@ -58,6 +62,10 @@ export async function getAll(): Promise<Item[]> {
         client && client.release();
     }
 }
+
+/*
+    Gets an Item based on its serial ID
+*/
 
 export async function getById(id: number): Promise<Item> {
 
@@ -75,6 +83,9 @@ export async function getById(id: number): Promise<Item> {
     }
 }
 
+/*
+    Saves an item to a unique serial number
+*/
 export async function save(newItem: Item, orderId: number): Promise<Item> {
     let client: PoolClient;
 
@@ -99,6 +110,10 @@ export async function save(newItem: Item, orderId: number): Promise<Item> {
     }
 }
 
+/*
+    Updates an Item given another Item
+*/
+
 export async function  update(updatedItem: Item): Promise<boolean> {
     let client: PoolClient;
 
@@ -119,6 +134,9 @@ export async function  update(updatedItem: Item): Promise<boolean> {
 }
 
 
+/*
+    Deletes an Item by its ID
+*/
 export async function  deleteById(id: number): Promise<boolean> {
     let client: PoolClient;
 

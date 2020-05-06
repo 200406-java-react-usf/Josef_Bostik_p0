@@ -22,6 +22,10 @@ let baseQuery = `
     on au.role_id = ur.id
 `;
 
+/*
+    Gets everything in the User Database
+*/
+
 export async function getAll(): Promise<User[]> {
     let client: PoolClient;
 
@@ -36,6 +40,10 @@ export async function getAll(): Promise<User[]> {
         client && client.release();
     }
 }
+
+/*
+    Gets all users assigned to the specified serial ID
+*/
 
 export async function getById(id: number): Promise<User> {
 
@@ -53,8 +61,10 @@ export async function getById(id: number): Promise<User> {
     }
 }
 
+/*
+    Gets a user by a specified unique key given its data type value
+*/
 
-//Doesnt check for validity (if a key really is unique)
 export async function getUserByUniqueKey(key: string, val: string): Promise<User> {
 
     let client: PoolClient;
@@ -70,6 +80,11 @@ export async function getUserByUniqueKey(key: string, val: string): Promise<User
         client && client.release();
     }    
 }
+
+
+/*
+    Gets a user given username and password
+*/
 
 export async function getUserByCredentials(un: string, pw: string): Promise<User> {
     
@@ -87,6 +102,10 @@ export async function getUserByCredentials(un: string, pw: string): Promise<User
     }
 }
 
+/*
+    Assigns a new User to the database with a new unique serial ID
+*/
+
 export async function save(newUser: User): Promise<User> {
 
     let client: PoolClient;
@@ -94,15 +113,12 @@ export async function save(newUser: User): Promise<User> {
     try {
         client = await connectionPool.connect();
 
-        // WIP: hacky fix since we need to make two DB calls
-        let roleId = (await client.query('select id from user_roles where name = $1', [newUser.role])).rows[0].id;
-        
         let sql = `
             insert into app_users (username, password, first_name, last_name, email, role_id) 
             values ($1, $2, $3, $4, $5, $6) returning id
         `;
 
-        let rs = await client.query(sql, [newUser.username, newUser.password, newUser.firstName, newUser.lastName, newUser.email, roleId]);
+        let rs = await client.query(sql, [newUser.username, newUser.password, newUser.firstName, newUser.lastName, newUser.email, newUser.role.id]);
         
         newUser.id = rs.rows[0].id;
         
@@ -116,13 +132,15 @@ export async function save(newUser: User): Promise<User> {
     }
 }
 
+/*
+    Updates a user in the database given a new user object.
+*/
+
 export async function update(updatedUser: User): Promise<boolean> {
     let client: PoolClient;
 
     try {
         client = await connectionPool.connect();
-
-        let roleId = (await client.query('select id from user_roles where name = $1', [updatedUser.role])).rows[0].id;
 
         let sql = `
             update app_users
@@ -130,7 +148,7 @@ export async function update(updatedUser: User): Promise<boolean> {
             where app_users.id = $1;
         `;
         console.log(updatedUser);
-        await client.query(sql, [updatedUser.id, updatedUser.username, updatedUser.password, updatedUser.firstName, updatedUser.lastName, updatedUser.email, roleId]);
+        await client.query(sql, [updatedUser.id, updatedUser.username, updatedUser.password, updatedUser.firstName, updatedUser.lastName, updatedUser.email, updatedUser.role.id]);
 
         return true;
     } catch (e) {
@@ -140,7 +158,9 @@ export async function update(updatedUser: User): Promise<boolean> {
     }
 }
 
-
+/*  
+    Deletes a User given its unique serial Id
+*/
 export async function deleteById(id: number): Promise<boolean> {
     let client: PoolClient;
 
