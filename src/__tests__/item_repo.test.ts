@@ -108,7 +108,7 @@ describe('itemRepo', () => {
         (mockMapper.mapItemResultSet as jest.Mock).mockReturnValue(mockItem);
 
         // Act
-        let result = await sut.getByID(1);
+        let result = await sut.getById(1);
 
         // Assert
         expect(result).toBeTruthy();
@@ -124,7 +124,7 @@ describe('itemRepo', () => {
         let mockItem = new Item(1, "name", "desc", 1.00, 1);
         (mockMapper.mapItemResultSet as jest.Mock).mockReturnValue(mockItem);
 
-        let result = await sut.save(mockItem);
+        let result = await sut.save(mockItem, 1);
 
         expect(result).toBeTruthy();
         expect(result instanceof Item).toBe(true);

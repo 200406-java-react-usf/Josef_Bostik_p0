@@ -2,6 +2,7 @@ import * as sut from '../repos/order_repo';
 import * as mockIndex from '..';
 import * as mockMapper from '../util/result-set-mapper';
 import { Order } from '../models/order';
+import { Item } from '../models/item';
 // import { UserRepoInstance } from '../config/app';
 
 
@@ -22,7 +23,8 @@ jest.mock('..', () => {
 // The result-set-mapper module also needs to be mocked
 jest.mock('../util/result-set-mapper', () => {
     return {
-        mapOrderResultSet: jest.fn()
+        mapOrderResultSet: jest.fn(),
+        mapItemResultSet: jest.fn()
     }
 });
 
@@ -56,6 +58,7 @@ describe('orderRepo', () => {
             }
         });
         (mockMapper.mapOrderResultSet as jest.Mock).mockClear();
+        (mockMapper.mapItemResultSet as jest.Mock).mockClear();
     });
 
     test('should resolve to an array of Orders when getAll retrieves records from data source', async () => {
@@ -99,6 +102,88 @@ describe('orderRepo', () => {
 
     });
 
+    test('should resolve to an array of Orders when getOrdersByUserId retrieves records from data source', async () => {
+        
+        // Arrange
+        expect.hasAssertions();
+
+        let mockOrder = new Order(1, 1, true, 'loc', 'dest');
+        (mockMapper.mapOrderResultSet as jest.Mock).mockReturnValue(mockOrder);
+
+        // Act
+        let result = await sut.getOrdersByUserId(1);
+
+        // Assert
+        expect(result).toBeTruthy();
+        expect(result instanceof Array).toBe(true);
+        expect(result.length).toBe(1);
+        expect(mockConnect).toBeCalledTimes(1);
+
+    });
+
+    test('should resolve to an empty array when getOrdersByUserId retrieves no records from data source', async () => {
+        
+        // Arrange
+        expect.hasAssertions();
+        (mockConnect as jest.Mock).mockImplementation(() => {
+            return {
+                query: jest.fn().mockImplementation(() => { return { rows: [] } }), 
+                release: jest.fn()
+            }
+        });
+
+        // Act
+        let result = await sut.getOrdersByUserId(1);
+
+        // Assert
+        expect(result).toBeTruthy();
+        expect(result instanceof Array).toBe(true);
+        expect(result.length).toBe(0);
+        expect(mockConnect).toBeCalledTimes(1);
+
+    });
+
+    test('should resolve to an array of Items when getItemsByOrderId retrieves records from data source', async () => {
+        
+        // Arrange
+        expect.hasAssertions();
+
+        let mockItem = new Item(1, "name", "desc", 1.00, 1);
+        (mockMapper.mapItemResultSet as jest.Mock).mockReturnValue(mockItem);
+
+        // Act
+        let result = await sut.getItemsByOrderId(1);
+
+        // Assert
+        expect(result).toBeTruthy();
+        expect(result instanceof Array).toBe(true);
+        expect(result.length).toBe(1);
+        expect(mockConnect).toBeCalledTimes(1);
+
+    });
+
+    test('should resolve to an empty array when getItemsByOrderId retrieves no records from data source', async () => {
+        
+        // Arrange
+        expect.hasAssertions();
+        (mockConnect as jest.Mock).mockImplementation(() => {
+            return {
+                query: jest.fn().mockImplementation(() => { return { rows: [] } }), 
+                release: jest.fn()
+            }
+        });
+
+        // Act
+        let result = await sut.getItemsByOrderId(1);
+
+        // Assert
+        expect(result).toBeTruthy();
+        expect(result instanceof Array).toBe(true);
+        expect(result.length).toBe(0);
+        expect(mockConnect).toBeCalledTimes(1);
+
+    });
+
     test('should resolve to a User object when getById retrieves a record from data source', async () => {
 
         // Arrange
@@ -108,7 +193,7 @@ describe('orderRepo', () => {
         (mockMapper.mapOrderResultSet as jest.Mock).mockReturnValue(mockOrder);
 
         // Act
-        let result = await sut.getByID(1);
+        let result = await sut.getById(1);
 
         // Assert
         expect(result).toBeTruthy();
@@ -151,5 +236,7 @@ describe('orderRepo', () => {
 
         expect(result).toBeTruthy();
     });
+
+    
 
 });
