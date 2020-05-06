@@ -11,6 +11,7 @@ import { isValidId,
 import { BadRequestError, 
     ResourceNotFoundError
 } from '../errors/errors';
+import { Item } from '../models/item';
 
 
 /**
@@ -40,7 +41,7 @@ export async function getOrderById(id: number): Promise<Order> {
         throw new BadRequestError();
     }
 
-    let order = await orderRepo.getByID(id);
+    let order = await orderRepo.getById(id);
 
     if (isEmptyObject(order)) {
         throw new ResourceNotFoundError();
@@ -50,6 +51,35 @@ export async function getOrderById(id: number): Promise<Order> {
 
 }
 
+export async function getOrdersByUserId(id: number): Promise<Order[]> {
+
+    if (!isValidId(id)) {
+        throw new BadRequestError();
+    }
+
+    let orders = await orderRepo.getOrdersByUserId(id);
+
+    if (isEmptyObject(orders)) {
+        throw new ResourceNotFoundError();
+    }
+
+    return orders;
+
+}
+
+export async function getItemsByOrderId(id: number): Promise<Item[]> {
+    if (!isValidId(id)) {
+        throw new BadRequestError();
+    }
+
+    let items = await orderRepo.getItemsByOrderId(id);
+
+    if (isEmptyObject(items)) {
+        throw new ResourceNotFoundError();
+    }
+
+    return items;
+}
 
 //Maybe add equivalent methods for :
 // getUserByCredentials(un: string, pw: string): Promise<User> {}

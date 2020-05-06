@@ -14,7 +14,8 @@ import {
 } from '../errors/errors';
 import { PoolClient } from 'pg';
 import { connectionPool } from '..';
-import { mapOrderResultSet } from '../util/result-set-mapper';
+import { mapOrderResultSet, mapItemResultSet } from '../util/result-set-mapper';
+import { Item } from '../models/item';
 
 let baseQuery = `
     select
@@ -42,14 +43,51 @@ export async function  getAll(): Promise<Order[]> {
     }
 }
 
-export async function  getByID(id: number): Promise<Order> {
+export async function  getById(id: number): Promise<Order> {
     let client: PoolClient;
 
     try {
         client = await connectionPool.connect();
-        let sql = `${baseQuery} where au.id = $1`;
+        let sql = `${baseQuery} where ao.id = $1`;
         let rs = await client.query(sql, [id]);
         return mapOrderResultSet(rs.rows[0]);
+    } catch (e) {
+        throw new InternalServerError();
+    } finally {
+        client && client.release();
+    }
+}
+
+export async function getOrdersByUserId(id: number): Promise<Order[]> {
+    let client: PoolClient;
+
+    try {
+        client = await connectionPool.connect();
+        let sql = `${baseQuery} where ao.customerid = $1`;
+        let rs = await client.query(sql, [id]);
+        return rs.rows.map(mapOrderResultSet);
+    } catch (e) {
+        throw new InternalServerError();
+    } finally {
+        client && client.release();
+    }
+}
+
+export async function  getItemsByOrderId(id: number): Promise<Item[]> {
+    let client: PoolClient;
+
+    try {
+        client = await connectionPool.connect();
+        let sql = `
+            select i.id, i.name, i.description, i.cost, i.amount
+            from app_items as i left join
+                order_item_jc as j
+                on j.itemid = i.id left join
+                app_orders as o
+                on j.orderid = $1;
+        `;
+        let rs = await client.query(sql, [id]);
+        return rs.rows.map(mapItemResultSet);
     } catch (e) {
         throw new InternalServerError();
     } finally {
