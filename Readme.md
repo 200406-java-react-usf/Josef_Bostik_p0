@@ -2,8 +2,8 @@ The purpose of this project is to create a basic online ordering system API, inc
 
 [POST] /auth : Authenticates user
 
-[GET] /users : Gets all users
-[GET] /users/:id : Gets user :id
+[GET] /users : Gets all users \n
+[GET] /users/:id : Gets user :id \n
 [GET] /users/:id/orders : Gets all the users orders with the specified :id
 [POST] /users : Posts a user given a JSON with user properties
 [DELETE] /users/:id : Deletes a user with serial :id
